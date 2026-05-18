@@ -8,7 +8,8 @@
         Title="XIVTools" Width="1280" Height="800"
         MinWidth="960" MinHeight="600"
         Background="{StaticResource BgBase}"
-        DragDrop.AllowDrop="True">
+        DragDrop.AllowDrop="True"
+        Icon="avares://xivtools-ui/Assets/icon-512.png">
 
   <Window.Resources>
     <vm:BoolToBrushConverter        x:Key="BoolToBrush"/>
