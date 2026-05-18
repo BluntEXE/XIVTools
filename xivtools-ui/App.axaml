@@ -83,37 +83,6 @@
       <Setter Property="FontSize"        Value="12"/>
     </Style>
 
-    <!-- ── ComboBox ─────────────────────────────────────────────── -->
-    <Style Selector="ComboBox">
-      <Setter Property="Background"      Value="{DynamicResource BgInput}"/>
-      <Setter Property="Foreground"      Value="{DynamicResource TextPrimary}"/>
-      <Setter Property="BorderBrush"     Value="{DynamicResource BorderSubtle}"/>
-      <Setter Property="BorderThickness" Value="1"/>
-      <Setter Property="CornerRadius"    Value="6"/>
-      <Setter Property="Padding"         Value="10,8"/>
-      <Setter Property="FontSize"        Value="12"/>
-      <Setter Property="Cursor"          Value="Hand"/>
-    </Style>
-    <Style Selector="ComboBox:pointerover /template/ Border#Background">
-      <Setter Property="Background"   Value="{DynamicResource BgHover}"/>
-      <Setter Property="BorderBrush"  Value="{DynamicResource AccentPrimary}"/>
-    </Style>
-    <Style Selector="ComboBox:focus /template/ Border#Background">
-      <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}"/>
-    </Style>
-    <Style Selector="ComboBoxItem">
-      <Setter Property="Background"  Value="{DynamicResource BgCard}"/>
-      <Setter Property="Foreground"  Value="{DynamicResource TextPrimary}"/>
-      <Setter Property="Padding"     Value="12,8"/>
-      <Setter Property="FontSize"    Value="12"/>
-    </Style>
-    <Style Selector="ComboBoxItem:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource BgHover}"/>
-    </Style>
-    <Style Selector="ComboBoxItem:selected /template/ ContentPresenter">
-      <Setter Property="Background" Value="{DynamicResource AccentPrimary}"/>
-    </Style>
-
     <!-- ── DataGrid column headers ──────────────────────────────── -->
     <Style Selector="DataGridColumnHeader">
       <Setter Property="Background"       Value="#08080F"/>
@@ -156,5 +125,131 @@
 
     <SolidColorBrush x:Key="BorderDefault"  Color="#1E2035"/>
     <SolidColorBrush x:Key="BorderSubtle"   Color="#252540"/>
+
+    <!-- ── ComboBox ControlThemes (must be in Resources, not Styles) ── -->
+    <ControlTheme x:Key="{x:Type ComboBox}" TargetType="ComboBox">
+      <Setter Property="Background"      Value="{DynamicResource BgCard}"/>
+      <Setter Property="Foreground"      Value="{DynamicResource TextPrimary}"/>
+      <Setter Property="BorderBrush"     Value="{DynamicResource BorderSubtle}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius"    Value="6"/>
+      <Setter Property="Padding"         Value="10,7"/>
+      <Setter Property="FontSize"        Value="12"/>
+      <Setter Property="Cursor"          Value="Hand"/>
+      <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Grid>
+            <Border x:Name="Background"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"/>
+            <Grid Margin="{TemplateBinding Padding}" ColumnDefinitions="*,Auto">
+              <ContentPresenter Grid.Column="0"
+                                Content="{TemplateBinding SelectionBoxItem}"
+                                ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                HorizontalAlignment="Left"
+                                VerticalAlignment="Center"
+                                Foreground="{TemplateBinding Foreground}"/>
+              <TextBlock Grid.Column="0"
+                         Text="{TemplateBinding PlaceholderText}"
+                         Foreground="{DynamicResource TextMuted}"
+                         VerticalAlignment="Center"
+                         IsVisible="{TemplateBinding SelectionBoxItem,
+                             Converter={x:Static ObjectConverters.IsNull}}"/>
+              <PathIcon Grid.Column="1"
+                        Data="M 0 0 L 4 4 L 8 0"
+                        Width="10" Height="6"
+                        Margin="8,0,2,0"
+                        Foreground="{DynamicResource TextMuted}"
+                        VerticalAlignment="Center"/>
+            </Grid>
+            <Popup x:Name="PART_Popup"
+                   IsOpen="{TemplateBinding IsDropDownOpen, Mode=TwoWay}"
+                   MinWidth="{Binding $parent[ComboBox].Bounds.Width}"
+                   MaxHeight="{TemplateBinding MaxDropDownHeight}"
+                   PlacementTarget="{TemplateBinding}"
+                   Placement="BottomEdgeAlignedLeft"
+                   IsLightDismissEnabled="True"
+                   WindowManagerAddShadowHint="False">
+              <Border Background="{DynamicResource BgCard}"
+                      BorderBrush="{DynamicResource BorderSubtle}"
+                      BorderThickness="1"
+                      CornerRadius="6"
+                      Padding="0,4">
+                <ScrollViewer>
+                  <ItemsPresenter/>
+                </ScrollViewer>
+              </Border>
+            </Popup>
+          </Grid>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover /template/ Border#Background">
+        <Setter Property="Background"  Value="{DynamicResource BgHover}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}"/>
+      </Style>
+      <Style Selector="^:focus /template/ Border#Background">
+        <Setter Property="BorderBrush" Value="{DynamicResource AccentPrimary}"/>
+      </Style>
+    </ControlTheme>
+    <ControlTheme x:Key="{x:Type ComboBoxItem}" TargetType="ComboBoxItem">
+      <Setter Property="Foreground"                Value="{DynamicResource TextPrimary}"/>
+      <Setter Property="Background"                Value="Transparent"/>
+      <Setter Property="Padding"                   Value="12,7"/>
+      <Setter Property="FontSize"                  Value="12"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Border Background="{TemplateBinding Background}"
+                  Padding="{TemplateBinding Padding}">
+            <ContentPresenter Content="{TemplateBinding Content}"
+                              Foreground="{TemplateBinding Foreground}"
+                              HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"/>
+          </Border>
+        </ControlTemplate>
+      </Setter>
+      <Style Selector="^:pointerover">
+        <Setter Property="Background" Value="{DynamicResource BgHover}"/>
+      </Style>
+      <Style Selector="^:selected">
+        <Setter Property="Background" Value="{DynamicResource AccentPrimary}"/>
+        <Setter Property="Foreground" Value="#FFFFFF"/>
+      </Style>
+      <Style Selector="^:selected:pointerover">
+        <Setter Property="Background" Value="#6D28D9"/>
+      </Style>
+    </ControlTheme>
+
+    <!-- Override Fluent Expander resource brushes -->
+    <SolidColorBrush x:Key="ExpanderContentBackground"              Color="#13131F"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBackground"               Color="#1A1A2E"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBackgroundPointerOver"    Color="#1E1E30"/>
+    <SolidColorBrush x:Key="ExpanderHeaderBackgroundPressed"        Color="#1E1E30"/>
+    <SolidColorBrush x:Key="ExpanderChevronBackground"              Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderChevronBackgroundPointerOver"   Color="Transparent"/>
+    <SolidColorBrush x:Key="ExpanderChevronBackgroundPressed"       Color="Transparent"/>
+
+    <!-- Override Fluent ComboBox resource brushes to match app palette -->
+    <SolidColorBrush x:Key="ComboBoxBackground"                  Color="#1A1A2E"/>
+    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver"        Color="#1E1E30"/>
+    <SolidColorBrush x:Key="ComboBoxBackgroundPressed"            Color="#1E1E30"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrush"                  Color="#252540"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrushPointerOver"       Color="#7C3AED"/>
+    <SolidColorBrush x:Key="ComboBoxBorderBrushPressed"           Color="#7C3AED"/>
+    <SolidColorBrush x:Key="ComboBoxDropDownBackground"           Color="#1A1A2E"/>
+    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush"          Color="#252540"/>
+    <SolidColorBrush x:Key="ComboBoxForeground"                   Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="ComboBoxItemForeground"               Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver"    Color="#1E1E30"/>
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected"       Color="#7C3AED"/>
+    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelectedPointerOver" Color="#6D28D9"/>
+    <!-- Fluent system brushes that ComboBox resources resolve to -->
+    <SolidColorBrush x:Key="SystemControlTransientBackgroundBrush"  Color="#1A1A2E"/>
+    <SolidColorBrush x:Key="SystemControlTransientBorderBrush"      Color="#252540"/>
+    <SolidColorBrush x:Key="SystemControlBackgroundAltMediumLowBrush" Color="#16162A"/>
+    <SolidColorBrush x:Key="SystemControlPageBackgroundAltMediumBrush" Color="#1E1E30"/>
+    <SolidColorBrush x:Key="SystemControlBackgroundListMediumBrush"  Color="#1E1E30"/>
   </Application.Resources>
 </Application>

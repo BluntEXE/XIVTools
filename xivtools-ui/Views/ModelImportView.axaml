@@ -76,7 +76,19 @@
               <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
                          Text="Converts your model to FFXIV's MDL format and writes it into the selected mod folder. Non-destructive."/>
               <ComboBox ItemsSource="{Binding InstalledMods}" SelectedItem="{Binding TargetMod}"
-                        HorizontalAlignment="Stretch"/>
+                        HorizontalAlignment="Stretch">
+                <ComboBox.Resources>
+                  <SolidColorBrush x:Key="ComboBoxBackground"             Color="#16162A"/>
+                  <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver"   Color="#1E1E30"/>
+                  <SolidColorBrush x:Key="ComboBoxBorderBrush"             Color="#252540"/>
+                  <SolidColorBrush x:Key="ComboBoxDropDownBackground"      Color="#1A1A2E"/>
+                  <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush"     Color="#252540"/>
+                  <SolidColorBrush x:Key="ComboBoxForeground"              Color="#F1F5F9"/>
+                  <SolidColorBrush x:Key="ComboBoxItemForeground"          Color="#F1F5F9"/>
+                  <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="#1E1E30"/>
+                  <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected"  Color="#7C3AED"/>
+                </ComboBox.Resources>
+              </ComboBox>
               <Button Classes="btn-primary" Command="{Binding ImportToModCommand}"
                       IsEnabled="{Binding CanImport}">
                 <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">

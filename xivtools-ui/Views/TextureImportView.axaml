@@ -81,7 +81,19 @@
                            Text="Writes the .tex file into the selected mod's folder. Penumbra will load it on next rediscover. Non-destructive — does not touch the game's sqpack."/>
                 <ComboBox ItemsSource="{Binding InstalledMods}"
                           SelectedItem="{Binding TargetMod}"
-                          HorizontalAlignment="Stretch"/>
+                          HorizontalAlignment="Stretch">
+                  <ComboBox.Resources>
+                    <SolidColorBrush x:Key="ComboBoxBackground"             Color="#16162A"/>
+                    <SolidColorBrush x:Key="ComboBoxBackgroundPointerOver"   Color="#1E1E30"/>
+                    <SolidColorBrush x:Key="ComboBoxBorderBrush"             Color="#252540"/>
+                    <SolidColorBrush x:Key="ComboBoxDropDownBackground"      Color="#1A1A2E"/>
+                    <SolidColorBrush x:Key="ComboBoxDropDownBorderBrush"     Color="#252540"/>
+                    <SolidColorBrush x:Key="ComboBoxForeground"              Color="#F1F5F9"/>
+                    <SolidColorBrush x:Key="ComboBoxItemForeground"          Color="#F1F5F9"/>
+                    <SolidColorBrush x:Key="ComboBoxItemBackgroundPointerOver" Color="#1E1E30"/>
+                    <SolidColorBrush x:Key="ComboBoxItemBackgroundSelected"  Color="#7C3AED"/>
+                  </ComboBox.Resources>
+                </ComboBox>
               </StackPanel>
             </Border>
           </StackPanel>
