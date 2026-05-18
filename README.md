@@ -1,6 +1,6 @@
 # XIVTools
 
-Native mod manager for FFXIV on Linux and Windows. Uses xivModdingFramework to read and write Penumbra collections and game files. No TexTools needed. No Wine on Windows.
+Native mod manager for FFXIV on Linux. Uses xivModdingFramework to read and write Penumbra collections and game files. No TexTools via WINE needed.
 
 ## Features
 
