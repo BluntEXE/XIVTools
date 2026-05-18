@@ -13,7 +13,7 @@
       <StackPanel Spacing="2">
         <TextBlock Text="Modpack Operations" FontSize="17" FontWeight="SemiBold"
                    Foreground="{StaticResource TextPrimary}"/>
-        <TextBlock Text="Upgrade pre-Dawntrail mods or convert between .ttmp2 and .pmp formats"
+        <TextBlock Text="Create, upgrade, and convert modpacks"
                    FontSize="10" Foreground="{StaticResource TextMuted}"/>
       </StackPanel>
     </Border>
@@ -108,6 +108,101 @@
                         FontFamily="Monospace" FontSize="12"
                         TextWrapping="Wrap"/>
           </StackPanel>
+        </Border>
+
+        <!-- Divider -->
+        <Border Height="1" Background="{StaticResource BorderDefault}" Margin="0,8"/>
+
+        <!-- ── Create Modpack ─────────────────────────────────────── -->
+        <StackPanel Spacing="4">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="PackageVariantClosed" Width="16" Height="16"
+                                   Foreground="{StaticResource AccentPrimary}"/>
+            <TextBlock Text="Create Modpack" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+          <TextBlock Text="Package a mod folder into a distributable .pmp file. Auto-reads metadata from Penumbra's meta.json."
+                     FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <!-- Source folder -->
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <TextBlock Text="Mod Folder" FontWeight="Medium" FontSize="13"
+                       Foreground="{StaticResource TextPrimary}"/>
+            <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                       Text="Select a Penumbra mod folder (contains meta.json) or any folder with game files organised by game path (chara/, ui/, bgcommon/, etc.)."/>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Grid.Column="0" Classes="field"
+                       Text="{Binding SourceFolder}"
+                       PlaceholderText="Select mod folder..."/>
+              <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                      Command="{Binding BrowseSourceFolderCommand}" Content="Browse"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Metadata -->
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <TextBlock Text="Modpack Metadata" FontWeight="Medium" FontSize="13"
+                       Foreground="{StaticResource TextPrimary}"/>
+            <Grid ColumnDefinitions="*,*" RowDefinitions="Auto,Auto" ColumnSpacing="12" RowSpacing="10">
+              <StackPanel Grid.Row="0" Grid.Column="0" Spacing="6">
+                <TextBlock Text="Name" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                <TextBox Classes="field" Text="{Binding PackName}" PlaceholderText="Mod name"/>
+              </StackPanel>
+              <StackPanel Grid.Row="0" Grid.Column="1" Spacing="6">
+                <TextBlock Text="Author" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                <TextBox Classes="field" Text="{Binding PackAuthor}" PlaceholderText="Your name"/>
+              </StackPanel>
+              <StackPanel Grid.Row="1" Grid.Column="0" Spacing="6">
+                <TextBlock Text="Version" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                <TextBox Classes="field" Text="{Binding PackVersion}" PlaceholderText="1.0.0"/>
+              </StackPanel>
+              <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6">
+                <TextBlock Text="Description" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                <TextBox Classes="field" Text="{Binding PackDesc}" PlaceholderText="Optional description"/>
+              </StackPanel>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Output + Create -->
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <TextBlock Text="Output File" FontWeight="Medium" FontSize="13"
+                       Foreground="{StaticResource TextPrimary}"/>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Grid.Column="0" Classes="field"
+                       Text="{Binding CreateOutput}"
+                       PlaceholderText="Output .pmp path..."/>
+              <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                      Command="{Binding BrowseCreateOutputCommand}" Content="Browse"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <Button Classes="btn-primary" HorizontalAlignment="Left"
+                Command="{Binding CreateModpackCommand}"
+                IsEnabled="{Binding !IsCreating}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="PackageVariantClosedPlus" Width="16" Height="16"/>
+            <TextBlock Text="Create .pmp" FontWeight="SemiBold"/>
+          </StackPanel>
+        </Button>
+
+        <ProgressBar IsIndeterminate="{Binding IsCreating}" IsVisible="{Binding IsCreating}"
+                     Height="3" CornerRadius="2"/>
+
+        <!-- Create log -->
+        <Border Classes="card" Padding="0"
+                IsVisible="{Binding CreateLog, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+          <SelectableTextBlock Margin="16,12"
+                      Text="{Binding CreateLog}"
+                      Foreground="{StaticResource TextSecondary}"
+                      FontFamily="Monospace" FontSize="12"
+                      TextWrapping="Wrap"/>
         </Border>
 
       </StackPanel>
