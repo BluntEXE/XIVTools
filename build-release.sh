@@ -26,7 +26,7 @@ build_gui() {
         -o "$OUTDIR/$name/app" \
         -p:IncludeNativeLibrariesForSelfExtract=true \
         -p:Version="$VERSION" \
-        2>&1 | grep -E "error|warning|published" || true
+        2>&1 | { grep -E "error|warning|published" || true; }
 }
 
 build_converter() {
@@ -40,7 +40,7 @@ build_converter() {
         --self-contained true \
         -p:PublishSingleFile=true \
         -o "$tmp" \
-        2>&1 | grep -E "error|published" || true
+        2>&1 | { grep -E "error|published" || true; }
     mkdir -p "$destdir"
     cp "$tmp/converter"* "$destdir/$binname" 2>/dev/null || \
     cp "$tmp/converter.exe" "$destdir/$binname" 2>/dev/null || \
@@ -66,6 +66,15 @@ assemble() {
 
     # Strip debug symbols to shrink size
     find "$base/app" -name "*.pdb" -delete 2>/dev/null || true
+
+    # Linux: bundle libdl.so (glibc 2.34+ merged libdl into libc; older .so refs still need it)
+    if [[ "$rid" == linux* ]]; then
+        local libdl
+        libdl="$(ldconfig -p 2>/dev/null | awk '/libdl\.so\.2.*x86-64/{print $NF; exit}')"
+        if [[ -f "$libdl" ]]; then
+            cp "$libdl" "$base/app/libdl.so"
+        fi
+    fi
 
     # Create zip
     echo "  Zipping $name..."
