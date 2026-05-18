@@ -1809,7 +1809,11 @@ namespace xivModdingFramework.Models.FileTypes
         {
 
             var cwd = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-            string importerFolder = cwd + "\\converters\\" + importerName;
+            var isLinux = !System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Windows);
+            string importerFolder = Path.Combine(cwd, "converters", importerName);
+            var converterExe = isLinux
+                ? Path.Combine(importerFolder, "converter")
+                : Path.Combine(importerFolder, "converter.exe");
             if (loggingFunction == null)
             {
                 loggingFunction = NoOp;
@@ -1819,12 +1823,12 @@ namespace xivModdingFramework.Models.FileTypes
             {
                 StartInfo = new ProcessStartInfo
                 {
-                    FileName = importerFolder + "\\converter.exe",
+                    FileName = converterExe,
                     Arguments = "\"" + filePath + "\"",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true,
                     UseShellExecute = false,
-                    WorkingDirectory = "" + importerFolder + "",
+                    WorkingDirectory = importerFolder,
                     CreateNoWindow = true
                 }
             };
@@ -1864,7 +1868,7 @@ namespace xivModdingFramework.Models.FileTypes
                 {
                     throw (new Exception("Importer exited with error code: " + proc.ExitCode.ToString()));
                 }
-                return importerFolder + "\\result.db";
+                return Path.Combine(Path.GetDirectoryName(filePath)!, "result.db");
             });
         }
 

@@ -117,31 +117,21 @@ public partial class ModelImportViewModel : ObservableObject
         _main.SetStatus(StatusMsg);
         try {
             await Task.Run(async () => {
-                // Export to DB first, then save the DB into the mod
-                var tmpDb = Path.Combine(Path.GetTempPath(), "xivtools_import_model.db");
-
-                // Use the framework to load the OBJ and convert to the game's MDL format
-                // then save as uncompressed MDL into the mod folder
                 var rtx = ModTransaction.BeginReadonlyTransaction();
-                var tx  = await ModTransaction.BeginTransaction(writeEnabled: false);
 
                 // Get existing MDL data to use as template for import settings
                 byte[]? existingMdl = null;
                 try { existingMdl = await rtx.ReadFile(GamePath.Trim()); } catch { }
 
-                // Import model - this uses the converter under the hood
-                // Save result into mod folder
-                var modsDir   = _main.Settings.ModsPath;
-                var outPath   = Path.Combine(modsDir, TargetMod,
+                var modsDir = _main.Settings.ModsPath;
+                var outPath = Path.Combine(modsDir, TargetMod,
                     GamePath.Trim().Replace('/', Path.DirectorySeparatorChar));
                 Directory.CreateDirectory(Path.GetDirectoryName(outPath)!);
 
-                await ModTransaction.CancelTransaction(tx, false);
-
-                // Load the source OBJ/FBX via TTModel, then export as uncompressed MDL to mod folder
-                var ttm = await xivModdingFramework.Models.DataContainers.TTModel.LoadFromFile(SourcePath);
+                var ttm = await Mdl.LoadExternalModel(SourcePath);
                 ttm.Source = GamePath.Trim();
-                await Mdl.ExportTTModelToFile(ttm, outPath, 1, null, rtx);
+                var mdlBytes = await Mdl.MakeUncompressedMdlFile(ttm, GamePath.Trim(), false, rtx);
+                File.WriteAllBytes(outPath, mdlBytes);
 
                 Avalonia.Threading.Dispatcher.UIThread.Post(() => {
                     StatusMsg = $"Saved to {TargetMod}/{Path.GetFileName(outPath)}";

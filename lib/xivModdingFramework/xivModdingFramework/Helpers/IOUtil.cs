@@ -621,52 +621,46 @@ namespace xivModdingFramework.Helpers
         public static async Task UnzipFiles(string zipLocation, string destination, Func<string, bool> selector)
         {
             var filesToUnzip = new HashSet<string>();
-            // Select all files in zip if null.
-            using (var zip = new Ionic.Zip.ZipFile(zipLocation))
+            using (var zip = ZipFile.OpenRead(zipLocation))
             {
-                var files = (zip.Entries.Select(x => ReplaceSlashes(x.FileName).ToLower()));
-
-                files = files.Where(x =>
-                {
-                    return selector(x);
-                });
-
+                var files = zip.Entries.Select(x => ReplaceSlashes(x.FullName).ToLower())
+                                       .Where(selector);
                 filesToUnzip.UnionWith(files);
             }
-
             await UnzipFiles(zipLocation, destination, filesToUnzip);
         }
-        public  static async Task UnzipFiles(string zipLocation, string destination, IEnumerable<string> files = null)
+
+        public static async Task UnzipFiles(string zipLocation, string destination, IEnumerable<string> files = null)
         {
             HashSet<string> filesToUnzip = null;
             if (files != null)
             {
                 filesToUnzip = new HashSet<string>();
                 foreach (var f in files)
-                {
                     filesToUnzip.Add(ReplaceSlashes(f).ToLower());
-                }
             }
 
             Directory.CreateDirectory(destination);
 
             await Task.Run(() =>
             {
-                using (var zip = new Ionic.Zip.ZipFile(zipLocation))
+                using var zip = ZipFile.OpenRead(zipLocation);
+                foreach (var e in zip.Entries)
                 {
-                    foreach (var e in zip.Entries)
+                    var normalizedName = ReplaceSlashes(e.FullName).ToLower();
+                    if (filesToUnzip != null && !filesToUnzip.Contains(normalizedName))
+                        continue;
+                    if (e.FullName.EndsWith("/") || e.FullName.EndsWith("\\"))
+                        continue; // directory entry
+                    try
                     {
-                        var normalizedName = ReplaceSlashes(e.FileName).ToLower();
-                        if (filesToUnzip != null && !filesToUnzip.Contains(normalizedName))
-                            continue;
-                        try
-                        {
-                            e.Extract(destination, Ionic.Zip.ExtractExistingFileAction.OverwriteSilently);
-                        }
-                        catch (Exception ex)
-                        {
-                            Trace.WriteLine(ex);
-                        }
+                        var destPath = Path.Combine(destination, e.FullName.Replace('/', Path.DirectorySeparatorChar));
+                        Directory.CreateDirectory(Path.GetDirectoryName(destPath)!);
+                        e.ExtractToFile(destPath, overwrite: true);
+                    }
+                    catch (Exception ex)
+                    {
+                        Trace.WriteLine(ex);
                     }
                 }
             });
