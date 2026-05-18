@@ -168,7 +168,7 @@
                 Command="{Binding ToggleModCommand}"
                 IsEnabled="{Binding SelectedMod.IsToggling, Converter={x:Static BoolConverters.Not}}">
           <Button.Background>
-            <SolidColorBrush Color="{StaticResource BgCard}"/>
+            <SolidColorBrush Color="#1A1A2E"/>
           </Button.Background>
           <Button.Styles>
             <Style Selector="Button">

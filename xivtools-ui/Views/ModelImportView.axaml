@@ -92,7 +92,7 @@
         <Expander Header="Advanced: Write directly to game data (destructive)"
                   Foreground="{StaticResource AccentAmber}">
           <StackPanel Spacing="8" Margin="0,8,0,0">
-            <Border Background="#1A1000" BorderBrush="{StaticResource AccentAmber}"
+            <Border Background="{StaticResource BgWarning}" BorderBrush="{StaticResource AccentAmber}"
                     BorderThickness="1" CornerRadius="6" Padding="12,8">
               <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource AccentAmber}"
                          Text="⚠ Modifies the game's .dat files directly. Make a backup first."/>
