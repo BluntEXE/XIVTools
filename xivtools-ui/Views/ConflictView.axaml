@@ -1,0 +1,169 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.ConflictView"
+             x:DataType="vm:ConflictViewModel"
+             Background="{StaticResource BgBase}">
+  <UserControl.Resources>
+    <vm:BoolToColorConverter  x:Key="BoolToColor"/>
+    <vm:BoolToStringConverter x:Key="BoolToString"/>
+  </UserControl.Resources>
+
+  <Grid RowDefinitions="Auto,Auto,Auto,*,Auto">
+
+    <!-- Header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2" >
+          <TextBlock Text="File Override Inspector" FontSize="17" FontWeight="SemiBold"
+                     Foreground="{StaticResource TextPrimary}"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="{Binding StatusMsg}"/>
+        </StackPanel>
+        <Button Grid.Column="1" VerticalAlignment="Center"
+                Command="{Binding ScanCommand}" IsEnabled="{Binding !IsBusy}"
+                Background="{StaticResource AccentPrimary}" Foreground="White"
+                BorderThickness="0" CornerRadius="8" Padding="16,8" Cursor="Hand">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="Magnify" Width="16" Height="16"/>
+            <TextBlock Text="Scan for Conflicts" FontWeight="SemiBold"/>
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- Stats bar -->
+    <Border Grid.Row="1" Padding="24,12"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1"
+            IsVisible="{Binding AllEntries.Count,
+                        Converter={x:Static ObjectConverters.IsNotNull}}">
+      <Grid ColumnDefinitions="Auto,1,Auto,1,Auto,1,*">
+        <StackPanel Grid.Column="0" Spacing="2" Margin="0,0,20,0">
+          <TextBlock Text="{Binding TrueConflictCount}" FontSize="24" FontWeight="Bold"
+                     Foreground="{StaticResource AccentAmber}"/>
+          <TextBlock Text="Same Priority" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="Penumbra picks one unpredictably"/>
+        </StackPanel>
+        <Border Grid.Column="1" Background="{StaticResource BorderDefault}" Margin="0,4"/>
+        <StackPanel Grid.Column="2" Spacing="2" Margin="20,0">
+          <TextBlock Text="{Binding OverrideCount}" FontSize="24" FontWeight="Bold"
+                     Foreground="{StaticResource AccentAmber}"/>
+          <TextBlock Text="Deliberate Overrides" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="Different priority — expected"/>
+        </StackPanel>
+        <Border Grid.Column="3" Background="{StaticResource BorderDefault}" Margin="0,4"/>
+        <StackPanel Grid.Column="4" Spacing="2" Margin="20,0">
+          <TextBlock Text="{Binding AffectedModCount}" FontSize="24" FontWeight="Bold"
+                     Foreground="{StaticResource AccentBlue}"/>
+          <TextBlock Text="Affected Mods" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+        </StackPanel>
+        <Border Grid.Column="5" Background="{StaticResource BorderDefault}" Margin="0,4"/>
+        <!-- Toggle -->
+        <StackPanel Grid.Column="6" Margin="20,0" VerticalAlignment="Center" Spacing="4">
+          <CheckBox Content="Show overrides (different priority)" FontSize="12"
+                    Foreground="{StaticResource TextSecondary}"
+                    IsChecked="{Binding ShowOverridesOnly}"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="Overrides are intentional — highest priority wins"/>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Search -->
+    <Border Grid.Row="2" Padding="24,10"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1"
+            IsVisible="{Binding AllEntries.Count,
+                        Converter={x:Static ObjectConverters.IsNotNull}}">
+      <Grid ColumnDefinitions="Auto,*">
+        <material:MaterialIcon Grid.Column="0" Kind="Magnify" Width="15" Height="15"
+                               Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+        <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0"
+                 PlaceholderText="Filter by file path or mod name..."
+                 Text="{Binding SearchText}" Foreground="{StaticResource TextPrimary}"/>
+      </Grid>
+    </Border>
+
+    <!-- Results grid -->
+    <Grid Grid.Row="3">
+      <DataGrid ItemsSource="{Binding FilteredEntries}"
+                SelectedItem="{Binding SelectedConflict}"
+                IsReadOnly="True"
+                GridLinesVisibility="Horizontal"
+                CanUserResizeColumns="True"
+                CanUserSortColumns="True"
+                Background="{StaticResource BgBase}"
+                RowBackground="{StaticResource BgBase}"
+                BorderThickness="0"
+                IsVisible="{Binding AllEntries.Count,
+                            Converter={x:Static ObjectConverters.IsNotNull}}">
+        <DataGrid.Columns>
+          <!-- Type badge -->
+          <DataGridTemplateColumn Header="Type" Width="80" CanUserSort="False">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate DataType="vm:ConflictEntry">
+                <Border CornerRadius="10" Padding="8,3" Margin="8,0"
+                        HorizontalAlignment="Left" VerticalAlignment="Center"
+                        Background="{Binding IsTrueConflict,
+                            Converter={StaticResource BoolToColor},
+                            ConverterParameter='#2B0D0D|#1A1200'}">
+                  <TextBlock FontSize="10" FontWeight="SemiBold"
+                             Text="{Binding ConflictType}"
+                             Foreground="{Binding IsTrueConflict,
+                                         Converter={StaticResource BoolToColor},
+                                         ConverterParameter='#EF4444|#F59E0B'}"/>
+                </Border>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTextColumn Header="File"      Binding="{Binding FileName}"  Width="*"   FontWeight="Medium"/>
+          <DataGridTextColumn Header="Winner"    Binding="{Binding Winner}"    Width="160" FontSize="11"/>
+          <DataGridTextColumn Header="Overridden By" Binding="{Binding Overridden}" Width="160" FontSize="11"/>
+          <DataGridTextColumn Header="#" Binding="{Binding Count}" Width="40"/>
+        </DataGrid.Columns>
+      </DataGrid>
+
+      <!-- Empty state -->
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                  IsVisible="{Binding !IsBusy}">
+        <material:MaterialIcon Kind="CheckCircleOutline" Width="56" Height="56"
+                               Foreground="{StaticResource TextMuted}"
+                               IsVisible="{Binding AllEntries.Count,
+                                           Converter={x:Static ObjectConverters.IsNull}}"/>
+        <TextBlock HorizontalAlignment="Center" FontSize="14"
+                   Foreground="{StaticResource TextMuted}"
+                   IsVisible="{Binding AllEntries.Count,
+                               Converter={x:Static ObjectConverters.IsNull}}"
+                   Text="Click Scan to check for conflicts and overrides"/>
+      </StackPanel>
+
+      <!-- Busy -->
+      <Border IsVisible="{Binding IsBusy}" Background="#CC000000">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+          <ProgressBar IsIndeterminate="True" Width="200"/>
+          <TextBlock Text="Scanning mods..." Foreground="{StaticResource TextSecondary}"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Selected detail -->
+    <Border Grid.Row="4"
+            IsVisible="{Binding SelectedConflict, Converter={x:Static ObjectConverters.IsNotNull}}"
+            Background="{StaticResource BgCard}"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,1,0,0"
+            Padding="24,10">
+      <StackPanel Spacing="4">
+        <TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimary}"
+                   Text="{Binding SelectedConflict.GamePath}"/>
+        <TextBlock FontSize="11" Foreground="{StaticResource TextSecondary}"
+                   Text="{Binding SelectedConflict.AllMods,
+                          StringFormat='{}Load order (highest priority wins): {0}'}"/>
+      </StackPanel>
+    </Border>
+  </Grid>
+</UserControl>

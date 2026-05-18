@@ -1,0 +1,125 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="XivToolsUI.App"
+             RequestedThemeVariant="Dark">
+
+  <Application.Styles>
+    <FluentTheme />
+    <StyleInclude Source="avares://Avalonia.Controls.DataGrid/Themes/Fluent.xaml"/>
+
+    <!-- ═══ GLOBAL DESIGN TOKENS ═══════════════════════════════════
+         Button system (3 variants × sizes):
+           btn         — ghost outline (secondary action)
+           btn-primary — filled purple  (primary CTA)
+           btn-danger  — red/amber      (destructive)
+         Card: Border Classes="card"
+         Input: TextBox Classes="field"
+         DataGrid header: applied globally
+    ══════════════════════════════════════════════════════════════ -->
+
+    <!-- ── Buttons ──────────────────────────────────────────────── -->
+    <Style Selector="Button.btn">
+      <Setter Property="Background"       Value="{DynamicResource BgCard}"/>
+      <Setter Property="Foreground"       Value="{DynamicResource TextSecondary}"/>
+      <Setter Property="BorderBrush"      Value="{DynamicResource BorderSubtle}"/>
+      <Setter Property="BorderThickness"  Value="1"/>
+      <Setter Property="Padding"          Value="12,6"/>
+      <Setter Property="CornerRadius"     Value="6"/>
+      <Setter Property="FontSize"         Value="12"/>
+      <Setter Property="Cursor"           Value="Hand"/>
+    </Style>
+    <Style Selector="Button.btn:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="{DynamicResource BgHover}"/>
+    </Style>
+    <Style Selector="Button.btn:disabled /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.45"/>
+    </Style>
+
+    <!-- btn-primary: filled purple, white text -->
+    <Style Selector="Button.btn-primary">
+      <Setter Property="Background"      Value="{DynamicResource AccentPrimary}"/>
+      <Setter Property="Foreground"      Value="#FFFFFF"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding"         Value="16,8"/>
+      <Setter Property="CornerRadius"    Value="8"/>
+      <Setter Property="FontSize"        Value="13"/>
+      <Setter Property="FontWeight"      Value="SemiBold"/>
+      <Setter Property="Cursor"          Value="Hand"/>
+      <Setter Property="HorizontalContentAlignment" Value="Center"/>
+    </Style>
+    <Style Selector="Button.btn-primary:disabled /template/ ContentPresenter">
+      <Setter Property="Opacity" Value="0.45"/>
+    </Style>
+
+    <!-- btn-danger: red destructive -->
+    <Style Selector="Button.btn-danger">
+      <Setter Property="Background"      Value="{DynamicResource AccentRed}"/>
+      <Setter Property="Foreground"      Value="#FFFFFF"/>
+      <Setter Property="BorderThickness" Value="0"/>
+      <Setter Property="Padding"         Value="14,6"/>
+      <Setter Property="CornerRadius"    Value="6"/>
+      <Setter Property="FontSize"        Value="12"/>
+      <Setter Property="FontWeight"      Value="SemiBold"/>
+      <Setter Property="Cursor"          Value="Hand"/>
+    </Style>
+
+    <!-- ── Cards ────────────────────────────────────────────────── -->
+    <Style Selector="Border.card">
+      <Setter Property="Background"       Value="{DynamicResource BgCard}"/>
+      <Setter Property="BorderBrush"      Value="{DynamicResource BorderSubtle}"/>
+      <Setter Property="BorderThickness"  Value="1"/>
+      <Setter Property="CornerRadius"     Value="8"/>
+      <Setter Property="Padding"          Value="16"/>
+    </Style>
+
+    <!-- ── Text inputs ───────────────────────────────────────────── -->
+    <Style Selector="TextBox.field">
+      <Setter Property="Background"      Value="{DynamicResource BgInput}"/>
+      <Setter Property="Foreground"      Value="{DynamicResource TextPrimary}"/>
+      <Setter Property="BorderBrush"     Value="{DynamicResource BorderSubtle}"/>
+      <Setter Property="BorderThickness" Value="1"/>
+      <Setter Property="CornerRadius"    Value="6"/>
+      <Setter Property="Padding"         Value="10,8"/>
+      <Setter Property="FontSize"        Value="12"/>
+    </Style>
+
+    <!-- ── DataGrid column headers ──────────────────────────────── -->
+    <Style Selector="DataGridColumnHeader">
+      <Setter Property="Background"       Value="#08080F"/>
+      <Setter Property="Foreground"       Value="{DynamicResource TextMuted}"/>
+      <Setter Property="FontSize"         Value="11"/>
+      <Setter Property="FontWeight"       Value="SemiBold"/>
+      <Setter Property="Padding"          Value="12,8"/>
+      <Setter Property="BorderBrush"      Value="{DynamicResource BorderDefault}"/>
+      <Setter Property="BorderThickness"  Value="0,0,0,1"/>
+    </Style>
+    <Style Selector="DataGridColumnHeader:pointerover">
+      <Setter Property="Background" Value="{DynamicResource BgCard}"/>
+    </Style>
+
+  </Application.Styles>
+
+  <!-- ── Global color + brush tokens ──────────────────────────── -->
+  <Application.Resources>
+    <SolidColorBrush x:Key="BgBase"       Color="#0D0D17"/>
+    <SolidColorBrush x:Key="BgSurface"    Color="#13131F"/>
+    <SolidColorBrush x:Key="BgCard"       Color="#1A1A2E"/>
+    <SolidColorBrush x:Key="BgSidebar"    Color="#0A0A14"/>
+    <SolidColorBrush x:Key="BgHover"      Color="#1E1E30"/>
+    <SolidColorBrush x:Key="BgInput"      Color="#16162A"/>
+
+    <SolidColorBrush x:Key="AccentPrimary"  Color="#7C3AED"/>
+    <SolidColorBrush x:Key="AccentBlue"     Color="#0EA5E9"/>
+    <SolidColorBrush x:Key="AccentGreen"    Color="#10B981"/>
+    <SolidColorBrush x:Key="AccentRed"      Color="#EF4444"/>
+    <SolidColorBrush x:Key="AccentAmber"    Color="#F59E0B"/>
+
+    <SolidColorBrush x:Key="TextPrimary"    Color="#F1F5F9"/>
+    <SolidColorBrush x:Key="TextSecondary"  Color="#94A3B8"/>
+    <SolidColorBrush x:Key="TextMuted"      Color="#475569"/>
+    <SolidColorBrush x:Key="TextAccent"     Color="#A78BFA"/>
+
+    <SolidColorBrush x:Key="BorderDefault"  Color="#1E2035"/>
+    <SolidColorBrush x:Key="BorderSubtle"   Color="#252540"/>
+  </Application.Resources>
+</Application>

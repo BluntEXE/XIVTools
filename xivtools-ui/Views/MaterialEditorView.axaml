@@ -1,0 +1,408 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             xmlns:cp="clr-namespace:Avalonia.Controls;assembly=Avalonia.Controls.ColorPicker"
+             x:Class="XivToolsUI.Views.MaterialEditorView"
+             x:DataType="vm:MaterialEditorViewModel"
+             Background="{StaticResource BgBase}">
+  <Grid RowDefinitions="Auto,Auto,*">
+
+    <!-- Header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2" >
+          <TextBlock Text="Material Editor" FontSize="17" FontWeight="SemiBold"
+                     Foreground="{StaticResource TextPrimary}"/>
+          <TextBlock Text="{Binding StatusMsg}" FontSize="10"
+                     Foreground="{StaticResource TextMuted}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="btn" Command="{Binding OpenFileCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="FolderOpen" Width="14" Height="14"/>
+              <TextBlock Text="Open .mtrl"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="btn" Command="{Binding OpenSaveToModCommand}"
+                  IsEnabled="{Binding HasFile}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="PackageVariantClosed" Width="14" Height="14"/>
+              <TextBlock Text="Save to Mod"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="btn-primary" Command="{Binding SaveFileCommand}"
+                  IsEnabled="{Binding HasFile}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="ContentSave" Width="14" Height="14"/>
+              <TextBlock Text="Save to Disk"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Game path extractor -->
+    <Border Grid.Row="1" Padding="24,10"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <material:MaterialIcon Grid.Column="0" Kind="Database" Width="14" Height="14"
+                               Foreground="{StaticResource TextMuted}"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+        <TextBox Grid.Column="1" Classes="field"
+                 Text="{Binding GamePath}"
+                 PlaceholderText="Game path — e.g. chara/equipment/e6071/material/v0001/mt_c0201e6071_top_a.mtrl"/>
+        <Button Grid.Column="2" Classes="btn" Margin="8,0,0,0"
+                Command="{Binding ExtractFromGameCommand}"
+                IsEnabled="{Binding !IsBusy}" Content="Extract from Game"/>
+      </Grid>
+    </Border>
+
+    <!-- Content -->
+    <Grid Grid.Row="2" ColumnDefinitions="*,300">
+
+      <!-- Colorset table -->
+      <Grid RowDefinitions="Auto,*">
+        <Border Grid.Row="0" Padding="24,12,24,8"
+                BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,1,1">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="Palette" Width="16" Height="16"
+                                   Foreground="{StaticResource AccentPrimary}"/>
+            <TextBlock Text="Colorset Rows" FontWeight="SemiBold" FontSize="13"
+                       Foreground="{StaticResource TextPrimary}"/>
+            <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"
+                       Text="{Binding ColorsetRows.Count, StringFormat='{}{0} rows'}"/>
+          </StackPanel>
+        </Border>
+
+        <Grid Grid.Row="1">
+        <ScrollViewer>
+          <StackPanel Spacing="0"
+                      IsVisible="{Binding HasFile}">
+            <!-- Column headers -->
+            <Border Background="#08080F" Padding="16,8"
+                    BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+              <Grid ColumnDefinitions="60,80,80,80,60,60,60,60,24">
+                <TextBlock Grid.Column="0" Text="Row"     Classes="col-header"/>
+                <TextBlock Grid.Column="1" Text="Diffuse"  Classes="col-header"/>
+                <TextBlock Grid.Column="2" Text="Specular" Classes="col-header"/>
+                <TextBlock Grid.Column="3" Text="Emissive" Classes="col-header"/>
+                <TextBlock Grid.Column="4" Text="Spec Pwr" Classes="col-header"/>
+                <TextBlock Grid.Column="5" Text="Gloss"    Classes="col-header"/>
+                <TextBlock Grid.Column="6" Text="Metal"    Classes="col-header"/>
+                <TextBlock Grid.Column="7" Text="Dye"      Classes="col-header"/>
+              </Grid>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding ColorsetRows}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:ColorsetRowViewModel">
+                  <StackPanel>
+                    <!-- Summary row - click to expand -->
+                    <Border Padding="16,6" Cursor="Hand"
+                            BorderBrush="{StaticResource BorderDefault}"
+                            BorderThickness="0,0,0,1"
+                            PointerPressed="OnRowClick">
+                      <Grid ColumnDefinitions="60,80,80,80,60,60,60,60,24">
+                        <TextBlock Grid.Column="0" Text="{Binding Label}"
+                                   FontSize="12" Foreground="{StaticResource TextMuted}"
+                                   VerticalAlignment="Center"/>
+                        <!-- Diffuse -->
+                        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                          <Border Width="20" Height="20" CornerRadius="3"
+                                  Background="{Binding DiffuseBrush}"/>
+                          <TextBlock Text="{Binding DiffuseHex}" FontSize="10" FontFamily="Monospace"
+                                     Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <!-- Specular -->
+                        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                          <Border Width="20" Height="20" CornerRadius="3"
+                                  Background="{Binding SpecularBrush}"/>
+                          <TextBlock Text="{Binding SpecularHex}" FontSize="10" FontFamily="Monospace"
+                                     Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <!-- Emissive -->
+                        <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                          <Border Width="20" Height="20" CornerRadius="3"
+                                  Background="{Binding EmissiveBrush}"/>
+                          <TextBlock Text="{Binding EmissiveHex}" FontSize="10" FontFamily="Monospace"
+                                     Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <TextBlock Grid.Column="4" FontSize="11" FontFamily="Monospace"
+                                   Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"
+                                   Text="{Binding SpecularPower, StringFormat='{}{0:F2}'}"/>
+                        <TextBlock Grid.Column="5" FontSize="11" FontFamily="Monospace"
+                                   Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"
+                                   Text="{Binding Gloss, StringFormat='{}{0:F2}'}"/>
+                        <TextBlock Grid.Column="6" FontSize="11" FontFamily="Monospace"
+                                   Foreground="{StaticResource TextSecondary}" VerticalAlignment="Center"
+                                   Text="{Binding Metalness, StringFormat='{}{0:F2}'}"/>
+                        <!-- Dye template indicator -->
+                        <TextBlock Grid.Column="7" FontSize="10" FontFamily="Monospace"
+                                   Foreground="{StaticResource AccentAmber}" VerticalAlignment="Center"
+                                   Text="{Binding DyeLabel}"
+                                   IsVisible="{Binding DyeTemplate,
+                                       Converter={x:Static ObjectConverters.IsNotNull}}"/>
+                        <TextBlock Grid.Column="8" FontSize="10" VerticalAlignment="Center"
+                                   Foreground="{StaticResource TextMuted}" Text="›"/>
+                      </Grid>
+                    </Border>
+
+                    <!-- Expanded editor panel -->
+                    <Border IsVisible="{Binding IsExpanded}"
+                            Background="{StaticResource BgCard}"
+                            Padding="16,12"
+                            BorderBrush="{StaticResource AccentPrimary}"
+                            BorderThickness="0,0,0,2">
+                      <StackPanel Spacing="0">
+                      <Grid ColumnDefinitions="*,*,*,*">
+                        <!-- Diffuse editor -->
+                        <StackPanel Grid.Column="0" Spacing="6" Margin="0,0,8,0">
+                          <TextBlock Text="Diffuse" FontSize="10" FontWeight="Bold"
+                                     Foreground="{StaticResource TextMuted}"/>
+                          <ColorPicker Color="{Binding Diffuse}" HorizontalAlignment="Left"/>
+                          <TextBox Text="{Binding DiffuseHex}" FontFamily="Monospace"
+                                   FontSize="11" Width="90"
+                                   Background="{StaticResource BgInput}"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   BorderBrush="{StaticResource BorderSubtle}"
+                                   Padding="6,4"/>
+                        </StackPanel>
+                        <!-- Specular editor -->
+                        <StackPanel Grid.Column="1" Spacing="6" Margin="0,0,8,0">
+                          <TextBlock Text="Specular" FontSize="10" FontWeight="Bold"
+                                     Foreground="{StaticResource TextMuted}"/>
+                          <ColorPicker Color="{Binding Specular}" HorizontalAlignment="Left"/>
+                          <TextBox Text="{Binding SpecularHex}" FontFamily="Monospace"
+                                   FontSize="11" Width="90"
+                                   Background="{StaticResource BgInput}"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   BorderBrush="{StaticResource BorderSubtle}"
+                                   Padding="6,4"/>
+                        </StackPanel>
+                        <!-- Emissive editor -->
+                        <StackPanel Grid.Column="2" Spacing="6" Margin="0,0,8,0">
+                          <TextBlock Text="Emissive" FontSize="10" FontWeight="Bold"
+                                     Foreground="{StaticResource TextMuted}"/>
+                          <ColorPicker Color="{Binding Emissive}" HorizontalAlignment="Left"/>
+                          <TextBox Text="{Binding EmissiveHex}" FontFamily="Monospace"
+                                   FontSize="11" Width="90"
+                                   Background="{StaticResource BgInput}"
+                                   Foreground="{StaticResource TextPrimary}"
+                                   BorderBrush="{StaticResource BorderSubtle}"
+                                   Padding="6,4"/>
+                        </StackPanel>
+                        <!-- Float values editor -->
+                        <StackPanel Grid.Column="3" Spacing="8">
+                          <StackPanel Spacing="4">
+                            <TextBlock Text="Specular Power" FontSize="10" FontWeight="Bold"
+                                       Foreground="{StaticResource TextMuted}"/>
+                            <NumericUpDown Value="{Binding SpecularPower}" Increment="0.01"
+                                          Minimum="0" Maximum="10" FormatString="F2"
+                                          Width="110"/>
+                          </StackPanel>
+                          <StackPanel Spacing="4">
+                            <TextBlock Text="Gloss" FontSize="10" FontWeight="Bold"
+                                       Foreground="{StaticResource TextMuted}"/>
+                            <NumericUpDown Value="{Binding Gloss}" Increment="0.01"
+                                          Minimum="0" Maximum="1" FormatString="F2"
+                                          Width="110"/>
+                          </StackPanel>
+                          <StackPanel Spacing="4">
+                            <TextBlock Text="Metalness" FontSize="10" FontWeight="Bold"
+                                       Foreground="{StaticResource TextMuted}"/>
+                            <NumericUpDown Value="{Binding Metalness}" Increment="0.01"
+                                          Minimum="0" Maximum="1" FormatString="F2"
+                                          Width="110"/>
+                          </StackPanel>
+                        </StackPanel>
+                      </Grid>
+
+                      <!-- Dye channel section -->
+                      <Border Margin="0,8,0,0" Padding="12,8" CornerRadius="6"
+                              Background="{StaticResource BgSurface}"
+                              BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1">
+                        <StackPanel Spacing="8">
+                          <StackPanel Orientation="Horizontal" Spacing="8">
+                            <material:MaterialIcon Kind="Palette" Width="13" Height="13"
+                                                   Foreground="{StaticResource AccentAmber}"/>
+                            <TextBlock Text="DYE CHANNELS" FontSize="10" FontWeight="Bold"
+                                       Foreground="{StaticResource TextMuted}" LetterSpacing="0.8"/>
+                          </StackPanel>
+                          <Grid ColumnDefinitions="Auto,*">
+                            <StackPanel Grid.Column="0" Spacing="4" Margin="0,0,16,0">
+                              <TextBlock Text="Template ID" FontSize="10" Foreground="{StaticResource TextMuted}"/>
+                              <NumericUpDown Value="{Binding DyeTemplate}" Minimum="0" Maximum="31"
+                                            Increment="1" Width="90" FormatString="0"/>
+                            </StackPanel>
+                            <WrapPanel Grid.Column="1">
+                              <CheckBox Content="Diffuse"       IsChecked="{Binding DyeDiffuse}"
+                                        FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                              <CheckBox Content="Specular"      IsChecked="{Binding DyeSpecular}"
+                                        FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                              <CheckBox Content="Emissive"      IsChecked="{Binding DyeEmissive}"
+                                        FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                              <CheckBox Content="Gloss"         IsChecked="{Binding DyeGloss}"
+                                        FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                              <CheckBox Content="Spec Power"    IsChecked="{Binding DyeSpecularPower}"
+                                        FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                              <CheckBox Content="Metalness"     IsChecked="{Binding DyeMetalness}"
+                                        FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                            </WrapPanel>
+                          </Grid>
+                        </StackPanel>
+                      </Border>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+
+        <!-- Empty state -->
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                    IsVisible="{Binding !HasFile}">
+          <material:MaterialIcon Kind="FileOutline" Width="48" Height="48"
+                                 Foreground="{StaticResource TextMuted}"/>
+          <TextBlock Text="No material loaded" FontSize="13"
+                     Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
+          <TextBlock Text="Open a .mtrl file or extract one from the game"
+                     FontSize="11" Foreground="{StaticResource TextMuted}"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+        </Grid>
+      </Grid>
+
+      <!-- Right panel: shader info -->
+      <Border Grid.Column="1"
+              BorderBrush="{StaticResource BorderDefault}" BorderThickness="1,0,0,0">
+      <Grid RowDefinitions="Auto,Auto,*">
+        <Border Grid.Row="0" Padding="16,12"
+                BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="LayersOutline" Width="16" Height="16"
+                                   Foreground="{StaticResource AccentBlue}"/>
+            <TextBlock Text="Shader Info" FontWeight="SemiBold" FontSize="13"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Shader name -->
+        <Border Grid.Row="1" Padding="16,10"
+                Background="{StaticResource BgCard}"
+                BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1"
+                IsVisible="{Binding HasFile}">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Shader Pack" FontSize="10" FontWeight="Bold"
+                       Foreground="{StaticResource TextMuted}" LetterSpacing="0.8"/>
+            <TextBlock Text="{Binding ShaderName}" FontSize="12" FontFamily="Monospace"
+                       Foreground="{StaticResource AccentBlue}" TextWrapping="Wrap"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Shader keys -->
+        <ScrollViewer Grid.Row="2">
+          <StackPanel Margin="16,8" Spacing="6"
+                      IsVisible="{Binding HasFile}">
+            <TextBlock Text="SHADER KEYS" FontSize="10" FontWeight="Bold"
+                       Foreground="{StaticResource TextMuted}" LetterSpacing="0.8"
+                       Margin="0,4,0,4"/>
+            <ItemsControl ItemsSource="{Binding ShaderKeys}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate DataType="vm:ShaderKeyViewModel">
+                  <Border Background="{StaticResource BgCard}"
+                          BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
+                          CornerRadius="6" Padding="10,8" Margin="0,0,0,4">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="Category" FontSize="9" Foreground="{StaticResource TextMuted}"/>
+                        <TextBlock Text="{Binding CategoryHex}" FontFamily="Monospace"
+                                   FontSize="11" Foreground="{StaticResource TextSecondary}"/>
+                      </StackPanel>
+                      <StackPanel Grid.Column="1" Spacing="2" HorizontalAlignment="Right">
+                        <TextBlock Text="Value" FontSize="9" Foreground="{StaticResource TextMuted}"
+                                   HorizontalAlignment="Right"/>
+                        <TextBox Text="{Binding Value}" FontFamily="Monospace"
+                                 FontSize="11" Width="100"
+                                 Background="{StaticResource BgInput}"
+                                 Foreground="{StaticResource AccentPrimary}"
+                                 BorderBrush="{StaticResource BorderSubtle}"
+                                 Padding="4,2"/>
+                      </StackPanel>
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </ScrollViewer>
+      </Grid>
+      </Border>
+    </Grid>
+
+    <!-- Save-to-Mod overlay -->
+    <Border Grid.Row="0" Grid.RowSpan="3"
+            IsVisible="{Binding ShowSaveToMod}"
+            Background="#CC000000">
+      <Border Background="{StaticResource BgCard}"
+              BorderBrush="{StaticResource AccentPrimary}" BorderThickness="1"
+              CornerRadius="10" Padding="28,24" MaxWidth="480"
+              HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="16">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <material:MaterialIcon Kind="PackageVariantClosed" Width="20" Height="20"
+                                   Foreground="{StaticResource AccentPrimary}"/>
+            <TextBlock Text="Save Material to Mod" FontSize="15" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Game Path (where this material lives in-game)"
+                       FontSize="11" Foreground="{StaticResource TextMuted}"/>
+            <TextBox Text="{Binding GamePath}" Classes="field"
+                     PlaceholderText="chara/equipment/e6071/material/v0001/mt_c0201e6071_top_a.mtrl"/>
+          </StackPanel>
+
+          <StackPanel Spacing="6">
+            <TextBlock Text="Target Mod" FontSize="11" Foreground="{StaticResource TextMuted}"/>
+            <ComboBox ItemsSource="{Binding InstalledMods}"
+                      SelectedItem="{Binding SaveToModTarget}"
+                      HorizontalAlignment="Stretch"/>
+          </StackPanel>
+
+          <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                     Text="The .mtrl file will be written inside the mod folder at the game path above. Penumbra will apply it on next redraw."/>
+
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+            <Button Classes="btn" Command="{Binding SaveToModCancelledCommand}"
+                    Content="Cancel"/>
+            <Button Classes="btn-primary" Command="{Binding SaveToModConfirmedCommand}"
+                    Content="Save to Mod"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+
+    <!-- Busy overlay -->
+    <Border Grid.Row="0" Grid.RowSpan="3" IsVisible="{Binding IsBusy}"
+            Background="#CC000000">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+        <ProgressBar IsIndeterminate="True" Width="200"/>
+        <TextBlock Text="{Binding StatusMsg}" Foreground="{StaticResource TextSecondary}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+  </Grid>
+
+  <UserControl.Styles>
+    <Style Selector="TextBlock.col-header">
+      <Setter Property="FontSize"     Value="10"/>
+      <Setter Property="FontWeight"   Value="Bold"/>
+      <Setter Property="Foreground"   Value="{StaticResource TextMuted}"/>
+      <Setter Property="VerticalAlignment" Value="Center"/>
+    </Style>
+  </UserControl.Styles>
+</UserControl>

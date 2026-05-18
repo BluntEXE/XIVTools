@@ -1,0 +1,116 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.ModpackView"
+             x:DataType="vm:ModpackViewModel"
+             Background="{StaticResource BgBase}">
+  <Grid RowDefinitions="Auto,*">
+
+    <!-- Page header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Modpack Operations" FontSize="17" FontWeight="SemiBold"
+                   Foreground="{StaticResource TextPrimary}"/>
+        <TextBlock Text="Upgrade pre-Dawntrail mods or convert between .ttmp2 and .pmp formats"
+                   FontSize="10" Foreground="{StaticResource TextMuted}"/>
+      </StackPanel>
+    </Border>
+
+    <ScrollViewer Grid.Row="1">
+      <StackPanel Margin="24" Spacing="20" MaxWidth="720">
+
+        <!-- Input card -->
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="FolderOpen" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentBlue}"/>
+              <TextBlock Text="Source Modpack" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimary}" FontSize="13"/>
+            </StackPanel>
+            <TextBlock Text="Supports .ttmp2, .ttmp, and .pmp formats"
+                       FontSize="11" Foreground="{StaticResource TextMuted}"/>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Grid.Column="0" Classes="field"
+                       Text="{Binding InputPath}"
+                       PlaceholderText="Select source modpack..."/>
+              <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                      Command="{Binding BrowseInputCommand}" Content="Browse"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Output card -->
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="ContentSave" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentGreen}"/>
+              <TextBlock Text="Output Path" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimary}" FontSize="13"/>
+            </StackPanel>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Grid.Column="0" Classes="field"
+                       Text="{Binding OutputPath}"
+                       PlaceholderText="Output .pmp path..."/>
+              <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                      Command="{Binding BrowseOutputCommand}" Content="Browse"/>
+            </Grid>
+          </StackPanel>
+        </Border>
+
+        <!-- Actions -->
+        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
+          <Button Grid.Column="0" Classes="btn-primary"
+                  Command="{Binding UpgradeCommand}" IsEnabled="{Binding !IsBusy}">
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+              <material:MaterialIcon Kind="ArrowUpCircle" Width="18" Height="18"/>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Upgrade to Dawntrail" FontWeight="SemiBold" FontSize="13"/>
+                <TextBlock Text="Fix shaders, models, materials" FontSize="10"
+                           Foreground="#A78BFA"/>
+              </StackPanel>
+            </StackPanel>
+          </Button>
+          <Button Grid.Column="1" Classes="btn"
+                  Command="{Binding ResaveCommand}" IsEnabled="{Binding !IsBusy}">
+            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+              <material:MaterialIcon Kind="Refresh" Width="18" Height="18"/>
+              <StackPanel Spacing="2">
+                <TextBlock Text="Convert Format" FontWeight="SemiBold" FontSize="13"/>
+                <TextBlock Text=".ttmp2 ↔ .pmp" FontSize="10"
+                           Foreground="{StaticResource TextMuted}"/>
+              </StackPanel>
+            </StackPanel>
+          </Button>
+        </Grid>
+
+        <!-- Progress -->
+        <ProgressBar IsIndeterminate="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                     Height="3" CornerRadius="2"/>
+
+        <!-- Log -->
+        <Border Classes="card" Padding="0">
+          <StackPanel>
+            <Border Padding="16,10" BorderBrush="{StaticResource BorderDefault}"
+                    BorderThickness="0,0,0,1">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <material:MaterialIcon Kind="Console" Width="14" Height="14"
+                                       Foreground="{StaticResource TextMuted}"/>
+                <TextBlock Text="Output Log" FontSize="12" FontWeight="Medium"
+                           Foreground="{StaticResource TextSecondary}"/>
+              </StackPanel>
+            </Border>
+            <SelectableTextBlock Margin="16" Text="{Binding OperationLog}"
+                        Foreground="{StaticResource TextSecondary}"
+                        FontFamily="Monospace" FontSize="12"
+                        TextWrapping="Wrap"/>
+          </StackPanel>
+        </Border>
+
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

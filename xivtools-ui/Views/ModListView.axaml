@@ -1,0 +1,239 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.ModListView"
+             x:DataType="vm:ModListViewModel"
+             Background="{StaticResource BgBase}">
+  <UserControl.Resources>
+    <vm:BoolToStringConverter x:Key="BoolToString"/>
+    <vm:BoolToColorConverter  x:Key="BoolToColor"/>
+  </UserControl.Resources>
+
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <!-- Header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2" >
+          <TextBlock Text="Mod List" FontSize="17" FontWeight="SemiBold"
+                     Foreground="{StaticResource TextPrimary}"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="{Binding EnabledCount}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="btn" Command="{Binding RefreshCommand}" IsEnabled="{Binding !IsLoading}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="Refresh" Width="14" Height="14"/>
+              <TextBlock Text="Refresh"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="btn" Command="{Binding OpenModFolderCommand}"
+                  IsEnabled="{Binding SelectedMod, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="FolderOpen" Width="14" Height="14"/>
+              <TextBlock Text="Folder"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Search -->
+    <Border Grid.Row="1" Padding="24,10,24,10"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,*">
+        <material:MaterialIcon Grid.Column="0" Kind="Magnify" Width="15" Height="15"
+                               Foreground="{StaticResource TextMuted}" VerticalAlignment="Center"
+                               Margin="0,0,8,0"/>
+        <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0"
+                 PlaceholderText="Search mods by name or author..."
+                 Text="{Binding SearchText}" Foreground="{StaticResource TextPrimary}"/>
+      </Grid>
+    </Border>
+
+    <!-- Mod grid -->
+    <DataGrid Grid.Row="2"
+              ItemsSource="{Binding FilteredMods}"
+              SelectedItem="{Binding SelectedMod}"
+              IsReadOnly="True"
+              GridLinesVisibility="Horizontal"
+              CanUserResizeColumns="True"
+              CanUserSortColumns="True"
+              Background="{StaticResource BgBase}"
+              RowBackground="{StaticResource BgBase}"
+              BorderThickness="0">
+      <DataGrid.ContextMenu>
+        <ContextMenu>
+          <MenuItem Header="Enable"
+                    Command="{Binding ToggleModCommand}"
+                    IsVisible="{Binding SelectedMod.Enabled,
+                                Converter={x:Static BoolConverters.Not}}">
+            <MenuItem.Icon>
+              <material:MaterialIcon Kind="CheckCircle" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentGreen}"/>
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Disable"
+                    Command="{Binding ToggleModCommand}"
+                    IsVisible="{Binding SelectedMod.Enabled}">
+            <MenuItem.Icon>
+              <material:MaterialIcon Kind="CloseCircle" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentRed}"/>
+            </MenuItem.Icon>
+          </MenuItem>
+          <Separator/>
+          <MenuItem Header="Upgrade to Dawntrail"
+                    Command="{Binding UpgradeModCommand}">
+            <MenuItem.Icon>
+              <material:MaterialIcon Kind="ArrowUpCircle" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentPrimary}"/>
+            </MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Open Folder"
+                    Command="{Binding OpenModFolderCommand}">
+            <MenuItem.Icon>
+              <material:MaterialIcon Kind="FolderOpen" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentBlue}"/>
+            </MenuItem.Icon>
+          </MenuItem>
+          <Separator/>
+          <MenuItem Header="Delete Mod..."
+                    Command="{Binding DeleteModCommand}"
+                    CommandParameter="{Binding SelectedMod}">
+            <MenuItem.Icon>
+              <material:MaterialIcon Kind="Delete" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentRed}"/>
+            </MenuItem.Icon>
+          </MenuItem>
+        </ContextMenu>
+      </DataGrid.ContextMenu>
+      <DataGrid.Columns>
+        <!-- Enabled badge -->
+        <DataGridTemplateColumn Header="State" Width="76" CanUserSort="False">
+          <DataGridTemplateColumn.CellTemplate>
+            <DataTemplate DataType="vm:ModEntry">
+              <Border CornerRadius="10" Padding="8,3" Margin="8,0"
+                      HorizontalAlignment="Left" VerticalAlignment="Center"
+                      Background="{Binding Enabled, Converter={StaticResource BoolToColor},
+                                  ConverterParameter='#0D2B1A|#2B0D0D'}">
+                <TextBlock FontSize="10" FontWeight="SemiBold"
+                           Text="{Binding EnabledLabel}"
+                           Foreground="{Binding Enabled, Converter={StaticResource BoolToColor},
+                                       ConverterParameter='#10B981|#EF4444'}"/>
+              </Border>
+            </DataTemplate>
+          </DataGridTemplateColumn.CellTemplate>
+        </DataGridTemplateColumn>
+
+        <DataGridTextColumn Header="Name"    Binding="{Binding Name}"    Width="2*" FontWeight="Medium"/>
+        <DataGridTextColumn Header="Author"  Binding="{Binding Author}"  Width="140"/>
+        <DataGridTextColumn Header="Version" Binding="{Binding Version}" Width="70"/>
+      </DataGrid.Columns>
+    </DataGrid>
+
+    <!-- Selected mod actions strip -->
+    <Border Grid.Row="3"
+            IsVisible="{Binding SelectedMod, Converter={x:Static ObjectConverters.IsNotNull}}"
+            Background="{StaticResource BgCard}"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,1,0,0"
+            Padding="20,10">
+      <Grid ColumnDefinitions="Auto,*,Auto,Auto,Auto">
+        <material:MaterialIcon Grid.Column="0" Kind="PackageVariantClosed"
+                               Width="18" Height="18" Margin="0,0,10,0"
+                               Foreground="{StaticResource AccentPrimary}" VerticalAlignment="Center"/>
+        <StackPanel Grid.Column="1" Spacing="1">
+          <TextBlock FontWeight="SemiBold" FontSize="13" Foreground="{StaticResource TextPrimary}"
+                     Text="{Binding SelectedMod.Name}"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="{Binding SelectedMod.FolderName}"/>
+        </StackPanel>
+        <Button Grid.Column="2" Classes="btn" Margin="6,0,4,0"
+                Command="{Binding UpgradeModCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="5">
+            <material:MaterialIcon Kind="ArrowUpCircle" Width="13" Height="13"/>
+            <TextBlock Text="DT Upgrade"/>
+          </StackPanel>
+        </Button>
+        <Button Grid.Column="3" Classes="btn" Margin="0,0,4,0"
+                Command="{Binding OpenModFolderCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="5">
+            <material:MaterialIcon Kind="FolderOpen" Width="13" Height="13"/>
+            <TextBlock Text="Open"/>
+          </StackPanel>
+        </Button>
+        <!-- Toggle enable/disable -->
+        <Button Grid.Column="4" Margin="0"
+                Command="{Binding ToggleModCommand}"
+                IsEnabled="{Binding SelectedMod.IsToggling, Converter={x:Static BoolConverters.Not}}">
+          <Button.Background>
+            <SolidColorBrush Color="#1A1A2E"/>
+          </Button.Background>
+          <Button.Styles>
+            <Style Selector="Button">
+              <Setter Property="BorderThickness" Value="0"/>
+              <Setter Property="CornerRadius"    Value="6"/>
+              <Setter Property="Padding"         Value="12,6"/>
+              <Setter Property="Cursor"          Value="Hand"/>
+            </Style>
+          </Button.Styles>
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <material:MaterialIcon Kind="ToggleSwitch" Width="14" Height="14"
+                                   Foreground="{Binding SelectedMod.Enabled,
+                                       Converter={StaticResource BoolToColor},
+                                       ConverterParameter='#EF4444|#10B981'}"/>
+            <TextBlock FontSize="12" FontWeight="SemiBold"
+                       Text="{Binding SelectedMod.Enabled,
+                              Converter={StaticResource BoolToString},
+                              ConverterParameter='Disable|Enable'}"
+                       Foreground="{Binding SelectedMod.Enabled,
+                                   Converter={StaticResource BoolToColor},
+                                   ConverterParameter='#EF4444|#10B981'}"/>
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- Loading overlay -->
+    <Border Grid.Row="2" IsVisible="{Binding IsLoading}" Background="#CC000000">
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+        <ProgressBar IsIndeterminate="True" Width="200"/>
+        <TextBlock Text="Loading mods..." Foreground="{StaticResource TextSecondary}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+    </Border>
+
+    <!-- Delete confirmation overlay -->
+    <Border Grid.Row="0" Grid.RowSpan="4"
+            IsVisible="{Binding ShowDeleteConfirm}"
+            Background="#CC000000">
+      <Border Background="{StaticResource BgCard}"
+              BorderBrush="{StaticResource AccentRed}"
+              BorderThickness="1" CornerRadius="10"
+              Padding="28,24" MaxWidth="400"
+              HorizontalAlignment="Center" VerticalAlignment="Center">
+        <StackPanel Spacing="16">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <material:MaterialIcon Kind="AlertCircle" Width="22" Height="22"
+                                   Foreground="{StaticResource AccentRed}"/>
+            <TextBlock Text="Delete Mod" FontSize="16" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimary}" VerticalAlignment="Center"/>
+          </StackPanel>
+          <TextBlock TextWrapping="Wrap" FontSize="13" Foreground="{StaticResource TextSecondary}">
+            <Run Text="Permanently delete "/>
+            <Run Text="{Binding DeleteConfirmName}" FontWeight="SemiBold"
+                 Foreground="{StaticResource TextPrimary}"/>
+            <Run Text="? This removes the mod folder from disk and cannot be undone."/>
+          </TextBlock>
+          <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+            <Button Content="Cancel" Classes="btn"
+                    Command="{Binding DeleteCancelledCommand}"/>
+            <Button Content="Delete" Classes="btn-danger"
+                    Command="{Binding DeleteConfirmedCommand}"/>
+          </StackPanel>
+        </StackPanel>
+      </Border>
+    </Border>
+  </Grid>
+</UserControl>

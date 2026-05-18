@@ -1,0 +1,117 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:views="using:XivToolsUI.Views"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.ModelViewerView"
+             x:DataType="vm:ModelViewerViewModel"
+             Background="{StaticResource BgBase}">
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <!-- Header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2" >
+          <TextBlock Text="Model Viewer" FontSize="17" FontWeight="SemiBold"
+                     Foreground="{StaticResource TextPrimary}"/>
+          <TextBlock Text="{Binding StatusMsg}" FontSize="10" Foreground="{StaticResource TextMuted}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="btn" Command="{Binding OpenFileCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="FolderOpen" Width="14" Height="14"/>
+              <TextBlock Text="Open .mdl"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Game path extractor -->
+    <Border Grid.Row="1" Padding="24,10"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <material:MaterialIcon Grid.Column="0" Kind="Database" Width="14" Height="14"
+                               Foreground="{StaticResource TextMuted}"
+                               VerticalAlignment="Center" Margin="0,0,8,0"/>
+        <TextBox Grid.Column="1" Background="Transparent" BorderThickness="0"
+                 Text="{Binding GamePath}" Foreground="{StaticResource TextPrimary}"
+                 PlaceholderText="Game path — e.g. chara/equipment/e6071/model/c0201e6071_top.mdl"/>
+        <Button Grid.Column="2" Classes="btn" Margin="8,0,0,0"
+                Command="{Binding ExtractFromGameCommand}"
+                IsEnabled="{Binding !IsBusy}" Content="Extract"/>
+      </Grid>
+    </Border>
+
+    <!-- 3D viewport -->
+    <Grid Grid.Row="2" x:Name="Viewport" Background="Transparent">
+      <views:ModelViewerControl x:Name="GlControl"
+                                HorizontalAlignment="Stretch"
+                                VerticalAlignment="Stretch"
+                                Focusable="True"/>
+
+      <!-- Stats overlay -->
+      <Border HorizontalAlignment="Left" VerticalAlignment="Top"
+              Margin="12" Padding="10,6" CornerRadius="6"
+              Background="#CC0D0D17"
+              IsVisible="{Binding HasModel}">
+        <StackPanel Spacing="2">
+          <TextBlock FontSize="11" Foreground="{StaticResource TextSecondary}"
+                     Text="{Binding MeshCount, StringFormat='{}Meshes: {0}'}"/>
+          <TextBlock FontSize="11" Foreground="{StaticResource TextSecondary}"
+                     Text="{Binding VertexCount, StringFormat='{}Vertices: {0:N0}'}"/>
+          <TextBlock FontSize="11" Foreground="{StaticResource TextSecondary}"
+                     Text="{Binding TriangleCount, StringFormat='{}Triangles: {0:N0}'}"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Camera controls hint -->
+      <Border HorizontalAlignment="Right" VerticalAlignment="Top"
+              Margin="12" Padding="10,6" CornerRadius="6"
+              Background="#CC0D0D17"
+              IsVisible="{Binding HasModel}">
+        <StackPanel Spacing="2">
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="Left drag — orbit"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="Right drag — pan"/>
+          <TextBlock FontSize="10" Foreground="{StaticResource TextMuted}"
+                     Text="Scroll — zoom"/>
+        </StackPanel>
+      </Border>
+
+      <!-- Reset button -->
+      <Button HorizontalAlignment="Right" VerticalAlignment="Bottom"
+              Margin="12" Classes="btn" x:Name="ResetBtn"
+              IsVisible="{Binding HasModel}">
+        <StackPanel Orientation="Horizontal" Spacing="6">
+          <material:MaterialIcon Kind="CameraFlip" Width="14" Height="14"/>
+          <TextBlock Text="Reset Camera"/>
+        </StackPanel>
+      </Button>
+
+      <!-- Empty state -->
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                  IsVisible="{Binding !HasModel}">
+        <material:MaterialIcon Kind="Cube" Width="56" Height="56"
+                               Foreground="{StaticResource TextMuted}"/>
+        <TextBlock Text="No model loaded" FontSize="14"
+                   Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
+        <TextBlock Text="Open an .mdl file or extract one from the game via path"
+                   FontSize="11" Foreground="{StaticResource TextMuted}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+
+      <!-- Loading overlay -->
+      <Border IsVisible="{Binding IsBusy}" Background="#CC000000">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+          <ProgressBar IsIndeterminate="True" Width="200"/>
+          <TextBlock Text="{Binding StatusMsg}" Foreground="{StaticResource TextSecondary}"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+  </Grid>
+</UserControl>

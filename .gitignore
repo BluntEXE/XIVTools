@@ -1,0 +1,22 @@
+# Build outputs
+bin/
+obj/
+publish/
+
+# Release staging
+../xivtools-release/
+
+# .NET
+*.user
+*.suo
+.vs/
+.idea/
+*.DotSettings.user
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs / temp
+*.log
+/tmp/

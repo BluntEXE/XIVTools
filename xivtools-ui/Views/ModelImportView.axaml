@@ -1,0 +1,115 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.ModelImportView"
+             x:DataType="vm:ModelImportViewModel"
+             Background="{StaticResource BgBase}">
+  <Grid RowDefinitions="Auto,*">
+
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Model Import" FontSize="17" FontWeight="SemiBold"
+                   Foreground="{StaticResource TextPrimary}"/>
+        <TextBlock Text="{Binding StatusMsg}" FontSize="10" Foreground="{StaticResource TextMuted}"/>
+      </StackPanel>
+    </Border>
+
+    <ScrollViewer Grid.Row="1">
+      <StackPanel Margin="24,20" Spacing="20" MaxWidth="700">
+
+        <!-- Source model -->
+        <StackPanel Spacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="Cube" Width="16" Height="16"
+                                   Foreground="{StaticResource AccentBlue}"/>
+            <TextBlock Text="Source Model" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}"
+                         Text="OBJ is supported natively. FBX requires: sudo pacman -S assimp python-pyassimp"/>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox Grid.Column="0" Classes="field" Text="{Binding SourcePath}"
+                         PlaceholderText="Path to .obj or .fbx file..."/>
+                <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                        Command="{Binding BrowseSourceCommand}" Content="Browse"/>
+              </Grid>
+              <TextBlock FontSize="11" Foreground="{StaticResource AccentGreen}"
+                         Text="{Binding FormatNote}"
+                         IsVisible="{Binding FormatNote,
+                             Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- Game path -->
+        <StackPanel Spacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="Database" Width="16" Height="16"
+                                   Foreground="{StaticResource AccentPrimary}"/>
+            <TextBlock Text="Target Game Path" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+          <Border Classes="card">
+            <StackPanel Spacing="8">
+              <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                         Text="The internal game path of the model to replace. Use Item Browser to find it."/>
+              <TextBox Classes="field" Text="{Binding GamePath}"
+                       PlaceholderText="chara/equipment/e6071/model/c0201e6071_top.mdl"/>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- Import to Mod -->
+        <StackPanel Spacing="8">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="PackageVariantClosed" Width="16" Height="16"
+                                   Foreground="{StaticResource AccentPrimary}"/>
+            <TextBlock Text="Write to Penumbra Mod (Recommended)" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                         Text="Converts your model to FFXIV's MDL format and writes it into the selected mod folder. Non-destructive."/>
+              <ComboBox ItemsSource="{Binding InstalledMods}" SelectedItem="{Binding TargetMod}"
+                        HorizontalAlignment="Stretch"/>
+              <Button Classes="btn-primary" Command="{Binding ImportToModCommand}"
+                      IsEnabled="{Binding CanImport}">
+                <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                  <material:MaterialIcon Kind="Import" Width="16" Height="16"/>
+                  <TextBlock Text="Import to Mod" FontWeight="SemiBold" FontSize="13"/>
+                </StackPanel>
+              </Button>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- Import to game (advanced) -->
+        <Expander Header="Advanced: Write directly to game data (destructive)"
+                  Foreground="{StaticResource AccentAmber}">
+          <StackPanel Spacing="8" Margin="0,8,0,0">
+            <Border Background="#1A1000" BorderBrush="{StaticResource AccentAmber}"
+                    BorderThickness="1" CornerRadius="6" Padding="12,8">
+              <TextBlock TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource AccentAmber}"
+                         Text="⚠ Modifies the game's .dat files directly. Make a backup first."/>
+            </Border>
+            <Button Classes="btn-danger" Command="{Binding ImportToGameCommand}"
+                    IsEnabled="{Binding CanImport}">
+              <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                <material:MaterialIcon Kind="AlertCircle" Width="16" Height="16"/>
+                <TextBlock Text="Write to Game Data" FontWeight="SemiBold"/>
+              </StackPanel>
+            </Button>
+          </StackPanel>
+        </Expander>
+
+        <ProgressBar IsIndeterminate="{Binding IsBusy}" IsVisible="{Binding IsBusy}" Height="3"/>
+
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

@@ -1,0 +1,151 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.TextureImportView"
+             x:DataType="vm:TextureImportViewModel"
+             Background="{StaticResource BgBase}">
+  <Grid RowDefinitions="Auto,*">
+
+    <!-- Header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Texture Import" FontSize="17" FontWeight="SemiBold"
+                   Foreground="{StaticResource TextPrimary}"/>
+        <TextBlock Text="{Binding StatusMsg}" FontSize="10" Foreground="{StaticResource TextMuted}"/>
+      </StackPanel>
+    </Border>
+
+    <ScrollViewer Grid.Row="1">
+      <Grid ColumnDefinitions="*,300" Margin="0">
+
+        <!-- Left: config -->
+        <StackPanel Margin="24,20,16,20" Spacing="20">
+
+          <!-- Source image -->
+          <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="ImagePlus" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentBlue}"/>
+              <TextBlock Text="Source Image" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimary}"/>
+            </StackPanel>
+            <Border Classes="card">
+              <StackPanel Spacing="10">
+                <TextBlock Text="PNG, DDS, BMP or TGA to import"
+                           FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBox Grid.Column="0" Classes="field" Text="{Binding SourcePath}"
+                           PlaceholderText="Path to image..."/>
+                  <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                          Command="{Binding BrowseSourceCommand}" Content="Browse"/>
+                </Grid>
+                <TextBlock FontSize="11" Foreground="{StaticResource TextSecondary}"
+                           Text="{Binding SourceInfo}"
+                           IsVisible="{Binding SourceInfo,
+                               Converter={x:Static StringConverters.IsNotNullOrEmpty}}"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- Game path -->
+          <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="Database" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentPrimary}"/>
+              <TextBlock Text="Game Path (What to Replace)" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimary}"/>
+            </StackPanel>
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                           Text="Internal game path of the texture to replace. Use the Item Browser to find it."/>
+                <TextBox Classes="field" Text="{Binding GamePath}"
+                         PlaceholderText="chara/equipment/e6071/texture/v01_c0201e6071_top_n.tex"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- Target mod -->
+          <StackPanel Spacing="8">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="PackageVariantClosed" Width="16" Height="16"
+                                     Foreground="{StaticResource AccentPrimary}"/>
+              <TextBlock Text="Write to Penumbra Mod" FontSize="14" FontWeight="SemiBold"
+                         Foreground="{StaticResource TextPrimary}"/>
+            </StackPanel>
+            <Border Classes="card">
+              <StackPanel Spacing="8">
+                <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                           Text="Writes the .tex file into the selected mod's folder. Penumbra will load it on next rediscover. Non-destructive — does not touch the game's sqpack."/>
+                <ComboBox ItemsSource="{Binding InstalledMods}"
+                          SelectedItem="{Binding TargetMod}"
+                          HorizontalAlignment="Stretch"/>
+              </StackPanel>
+            </Border>
+          </StackPanel>
+
+          <!-- Import button -->
+          <StackPanel Spacing="8">
+            <Button Classes="btn-primary" Command="{Binding ImportToModCommand}"
+                    IsEnabled="{Binding CanImport}">
+              <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                <material:MaterialIcon Kind="Import" Width="18" Height="18"/>
+                <TextBlock Text="Import to Penumbra Mod" FontWeight="SemiBold" FontSize="14"/>
+              </StackPanel>
+            </Button>
+
+            <!-- Advanced: write to game -->
+            <Expander Header="Advanced: Write directly to game data (destructive)"
+                      Foreground="{StaticResource AccentAmber}">
+              <StackPanel Spacing="8" Margin="0,8,0,0">
+                <Border Background="#1A1000" BorderBrush="{StaticResource AccentAmber}"
+                        BorderThickness="1" CornerRadius="6" Padding="12,8">
+                  <TextBlock TextWrapping="Wrap" FontSize="11"
+                             Foreground="{StaticResource AccentAmber}"
+                             Text="⚠ This modifies the game's .dat files directly. Make a backup first. Penumbra mod import is safer and reversible."/>
+                </Border>
+                <Button Classes="btn-danger" Command="{Binding ImportToGameCommand}"
+                        IsEnabled="{Binding CanImport}">
+                  <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
+                    <material:MaterialIcon Kind="AlertCircle" Width="16" Height="16"/>
+                    <TextBlock Text="Write to Game Data" FontWeight="SemiBold"/>
+                  </StackPanel>
+                </Button>
+              </StackPanel>
+            </Expander>
+
+            <ProgressBar IsIndeterminate="{Binding IsBusy}"
+                         IsVisible="{Binding IsBusy}" Height="3"/>
+          </StackPanel>
+
+        </StackPanel>
+
+        <!-- Right: preview -->
+        <StackPanel Grid.Column="1" Margin="0,20,24,20" Spacing="8">
+          <TextBlock Text="Preview" FontSize="13" FontWeight="SemiBold"
+                     Foreground="{StaticResource TextMuted}"/>
+          <Border Background="{StaticResource BgCard}"
+                  BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
+                  CornerRadius="8" MinHeight="200">
+            <Grid>
+              <Image Source="{Binding SourcePreview}" Stretch="Uniform" Margin="12"
+                     IsVisible="{Binding SourcePreview,
+                         Converter={x:Static ObjectConverters.IsNotNull}}"/>
+              <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8"
+                          IsVisible="{Binding SourcePreview,
+                              Converter={x:Static ObjectConverters.IsNull}}">
+                <material:MaterialIcon Kind="ImageOff" Width="40" Height="40"
+                                       Foreground="{StaticResource TextMuted}"/>
+                <TextBlock Text="No image selected" FontSize="12"
+                           Foreground="{StaticResource TextMuted}"/>
+              </StackPanel>
+            </Grid>
+          </Border>
+        </StackPanel>
+
+      </Grid>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

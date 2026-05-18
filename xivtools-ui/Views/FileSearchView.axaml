@@ -1,0 +1,126 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.FileSearchView"
+             x:DataType="vm:FileSearchViewModel"
+             Background="{StaticResource BgBase}">
+  <UserControl.Resources>
+    <vm:BoolToColorConverter  x:Key="BoolToColor"/>
+    <vm:BoolToStringConverter x:Key="BoolToString"/>
+  </UserControl.Resources>
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <!-- Header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2" >
+          <TextBlock Text="File Search" FontSize="17" FontWeight="SemiBold"
+                     Foreground="{StaticResource TextPrimary}"/>
+          <TextBlock Text="{Binding StatusMsg}" FontSize="10" Foreground="{StaticResource TextMuted}"/>
+        </StackPanel>
+        <Button Grid.Column="1" VerticalAlignment="Center" Classes="btn"
+                Command="{Binding RebuildIndexCommand}" IsEnabled="{Binding !IsBusy}"
+                ToolTip.Tip="Force rebuild the file index">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <material:MaterialIcon Kind="Refresh" Width="14" Height="14"/>
+            <TextBlock Text="Rebuild Index"/>
+          </StackPanel>
+        </Button>
+      </Grid>
+    </Border>
+
+    <!-- Search bar -->
+    <Border Grid.Row="1" Padding="24,12"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBox Grid.Column="0" Classes="field"
+                 Text="{Binding Query}"
+                 PlaceholderText="Search by game path — e.g. h0184, e6071, top_n.tex, bibo..."
+                 KeyDown="OnKeyDown"/>
+        <Button Grid.Column="1" Margin="8,0,0,0"
+                Background="{StaticResource AccentPrimary}" Foreground="White"
+                BorderThickness="0" CornerRadius="6" Padding="16,8" Cursor="Hand"
+                Command="{Binding SearchCommand}" IsEnabled="{Binding !IsBusy}"
+                Content="Search"/>
+      </Grid>
+    </Border>
+
+    <!-- Results -->
+    <Grid Grid.Row="2">
+      <DataGrid ItemsSource="{Binding Results}"
+                IsReadOnly="True"
+                GridLinesVisibility="Horizontal"
+                CanUserResizeColumns="True"
+                CanUserSortColumns="True"
+                Background="{StaticResource BgBase}"
+                RowBackground="{StaticResource BgBase}"
+                BorderThickness="0"
+                IsVisible="{Binding Results.Count,
+                            Converter={x:Static ObjectConverters.IsNotNull}}">
+        <DataGrid.Columns>
+          <!-- Enabled badge -->
+          <DataGridTemplateColumn Header="State" Width="80" CanUserSort="False">
+            <DataGridTemplateColumn.CellTemplate>
+              <DataTemplate DataType="vm:FileSearchResult">
+                <Border CornerRadius="10" Padding="8,3" Margin="8,0"
+                        HorizontalAlignment="Left" VerticalAlignment="Center"
+                        Background="{Binding Enabled, Converter={StaticResource BoolToColor},
+                                    ConverterParameter='#0D2B1A|#1A1A1A'}">
+                  <TextBlock FontSize="10" FontWeight="SemiBold"
+                             Text="{Binding Status}"
+                             Foreground="{Binding Enabled, Converter={StaticResource BoolToColor},
+                                         ConverterParameter='#10B981|#475569'}"/>
+                </Border>
+              </DataTemplate>
+            </DataGridTemplateColumn.CellTemplate>
+          </DataGridTemplateColumn>
+          <DataGridTextColumn Header="Mod"       Binding="{Binding ModName}"  Width="*"   FontWeight="Medium"/>
+          <DataGridTextColumn Header="Game Path" Binding="{Binding GamePath}" Width="2*"  FontSize="11"/>
+          <DataGridTextColumn Header="Local Path" Binding="{Binding LocalPath}" Width="160" FontSize="11"/>
+        </DataGrid.Columns>
+      </DataGrid>
+
+      <!-- Indexing indicator -->
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                  IsVisible="{Binding Indexing}">
+        <ProgressBar IsIndeterminate="True" Width="200"/>
+        <TextBlock Text="Building file index..." Foreground="{StaticResource TextSecondary}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+
+      <!-- Empty state -->
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                  IsVisible="{Binding !IsBusy}">
+        <material:MaterialIcon Kind="FileSearch" Width="56" Height="56"
+                               Foreground="{StaticResource TextMuted}"
+                               IsVisible="{Binding Results.Count,
+                                           Converter={x:Static ObjectConverters.IsNull}}"/>
+        <TextBlock HorizontalAlignment="Center" FontSize="14"
+                   Foreground="{StaticResource TextMuted}"
+                   IsVisible="{Binding Results.Count,
+                               Converter={x:Static ObjectConverters.IsNull}}"
+                   Text="Search any game path fragment across all installed mods"/>
+      </StackPanel>
+
+      <!-- Busy overlay -->
+      <Border IsVisible="{Binding IsBusy}" Background="#CC000000">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+          <ProgressBar IsIndeterminate="True" Width="200"/>
+          <TextBlock Text="Searching..." Foreground="{StaticResource TextSecondary}"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Selected detail -->
+    <Border Grid.Row="3" Background="{StaticResource BgCard}"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,1,0,0"
+            Padding="24,8" IsVisible="{Binding Results.Count,
+                                       Converter={x:Static ObjectConverters.IsNotNull}}">
+      <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}"
+                 Text="Results show all installed mods (enabled + disabled) that provide matching files. Enabled mods show priority."/>
+    </Border>
+  </Grid>
+</UserControl>

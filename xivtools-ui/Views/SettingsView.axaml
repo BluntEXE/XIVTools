@@ -1,0 +1,101 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.SettingsView"
+             x:DataType="vm:SettingsViewModel"
+             Background="{StaticResource BgBase}">
+  <Grid RowDefinitions="Auto,*">
+
+    <!-- Page header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <StackPanel Spacing="2">
+        <TextBlock Text="Settings" FontSize="17" FontWeight="SemiBold"
+                   Foreground="{StaticResource TextPrimary}"/>
+        <TextBlock Text="Configure paths and preferences" FontSize="10"
+                   Foreground="{StaticResource TextMuted}"/>
+      </StackPanel>
+    </Border>
+
+    <ScrollViewer Grid.Row="1">
+      <StackPanel Margin="24" Spacing="24" MaxWidth="680">
+
+        <!-- Game path section -->
+        <StackPanel Spacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <material:MaterialIcon Kind="Sword" Width="18" Height="18"
+                                   Foreground="{StaticResource AccentBlue}"/>
+            <TextBlock Text="FFXIV Installation" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Text="Game Path" FontWeight="Medium" FontSize="13"
+                         Foreground="{StaticResource TextPrimary}"/>
+              <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                         Text="The FFXIV installation folder containing ffxiv_dx11.exe. Auto-detected from XIVLauncher on first launch."/>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox Grid.Column="0" Classes="field"
+                         Text="{Binding GamePath}"
+                         PlaceholderText="/path/to/game"/>
+                <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                        Command="{Binding BrowseGamePathCommand}" Content="Browse"/>
+              </Grid>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- Mods path section -->
+        <StackPanel Spacing="12">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <material:MaterialIcon Kind="PackageVariantClosed" Width="18" Height="18"
+                                   Foreground="{StaticResource AccentPrimary}"/>
+            <TextBlock Text="Penumbra" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+
+          <Border Classes="card">
+            <StackPanel Spacing="10">
+              <TextBlock Text="Mods Directory" FontWeight="Medium" FontSize="13"
+                         Foreground="{StaticResource TextPrimary}"/>
+              <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"
+                         Text="The folder where Penumbra stores installed mods. Auto-detected from XIVLauncher config. On Windows: %AppData%\XIVLauncher\pluginConfigs\Penumbra. On Linux: ~/.xlcore wine prefix."/>
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBox Grid.Column="0" Classes="field"
+                         Text="{Binding ModsPath}"
+                         PlaceholderText="Path to Penumbra mods folder"/>
+                <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                        Command="{Binding BrowseModsPathCommand}" Content="Browse"/>
+              </Grid>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <!-- Save button -->
+        <StackPanel Spacing="12">
+          <Button Classes="btn-primary" Command="{Binding SaveAndApplyCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="ContentSave" Width="16" Height="16"/>
+              <TextBlock Text="Save and Apply" FontWeight="SemiBold"/>
+            </StackPanel>
+          </Button>
+
+          <!-- Status message -->
+          <Border CornerRadius="6" Padding="12,8"
+                  IsVisible="{Binding StatusMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
+                  Background="#0D2B1A" BorderBrush="#10B981" BorderThickness="1">
+            <StackPanel Orientation="Horizontal" Spacing="8">
+              <material:MaterialIcon Kind="CheckCircle" Width="14" Height="14"
+                                     Foreground="{StaticResource AccentGreen}"/>
+              <TextBlock FontSize="12" Foreground="{StaticResource AccentGreen}"
+                         Text="{Binding StatusMsg}" TextWrapping="Wrap"/>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+      </StackPanel>
+    </ScrollViewer>
+  </Grid>
+</UserControl>

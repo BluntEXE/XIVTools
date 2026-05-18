@@ -1,0 +1,114 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.TextureView"
+             x:DataType="vm:TextureViewModel"
+             Background="{StaticResource BgBase}">
+  <Grid RowDefinitions="Auto,Auto,*,Auto">
+
+    <!-- Page header -->
+    <Border Grid.Row="0" Padding="24,20,24,16"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2">
+          <TextBlock Text="Texture Viewer" FontSize="17" FontWeight="SemiBold"
+                     Foreground="{StaticResource TextPrimary}"/>
+          <TextBlock Text="{Binding Info}" FontSize="10" Foreground="{StaticResource TextMuted}"/>
+        </StackPanel>
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="btn" Command="{Binding BrowseTextureCommand}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="FolderOpen" Width="15" Height="15"/>
+              <TextBlock Text="Open File"/>
+            </StackPanel>
+          </Button>
+          <Button Classes="btn" Command="{Binding ExportTextureCommand}"
+                  IsEnabled="{Binding Preview, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+              <material:MaterialIcon Kind="Export" Width="15" Height="15"/>
+              <TextBlock Text="Export"/>
+            </StackPanel>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <!-- Path input -->
+    <Border Grid.Row="1" Padding="24,12"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBox Grid.Column="0" Classes="field"
+                 Text="{Binding TexturePath}"
+                 PlaceholderText="Path to .tex file, or game path like chara/equipment/e6071/texture/..."/>
+        <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                Command="{Binding LoadTextureCommand}" Content="Load"/>
+      </Grid>
+    </Border>
+
+    <!-- Preview area -->
+    <Grid Grid.Row="2">
+      <!-- Checkerboard bg (indicates transparency) -->
+      <Border Background="{StaticResource BgSurface}"
+              IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNotNull}}">
+        <Border.Background>
+          <DrawingBrush TileMode="Tile" DestinationRect="0,0,20,20" SourceRect="0,0,20,20">
+            <DrawingBrush.Drawing>
+              <DrawingGroup>
+                <GeometryDrawing Brush="#1A1A2E">
+                  <GeometryDrawing.Geometry>
+                    <RectangleGeometry Rect="0,0,20,20"/>
+                  </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+                <GeometryDrawing Brush="#252540">
+                  <GeometryDrawing.Geometry>
+                    <GeometryGroup>
+                      <RectangleGeometry Rect="0,0,10,10"/>
+                      <RectangleGeometry Rect="10,10,10,10"/>
+                    </GeometryGroup>
+                  </GeometryDrawing.Geometry>
+                </GeometryDrawing>
+              </DrawingGroup>
+            </DrawingBrush.Drawing>
+          </DrawingBrush>
+        </Border.Background>
+      </Border>
+
+      <ScrollViewer HorizontalScrollBarVisibility="Auto"
+                    VerticalScrollBarVisibility="Auto">
+        <Image Source="{Binding Preview}" Stretch="Uniform" Margin="24"
+               IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNotNull}}"/>
+      </ScrollViewer>
+
+      <!-- Empty state -->
+      <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12"
+                  IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNull}}">
+        <material:MaterialIcon Kind="ImageOff" Width="48" Height="48"
+                               Foreground="{StaticResource TextMuted}"/>
+        <TextBlock Text="No texture loaded" FontSize="14"
+                   Foreground="{StaticResource TextMuted}" HorizontalAlignment="Center"/>
+        <TextBlock Text="Open a .tex, .png, or .dds file to preview it"
+                   FontSize="12" Foreground="{StaticResource TextMuted}"
+                   HorizontalAlignment="Center"/>
+      </StackPanel>
+
+      <!-- Busy overlay -->
+      <Border IsVisible="{Binding IsBusy}" Background="#80000000">
+        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
+          <ProgressBar IsIndeterminate="True" Width="160"/>
+          <TextBlock Text="Loading texture..." Foreground="{StaticResource TextSecondary}"
+                     HorizontalAlignment="Center"/>
+        </StackPanel>
+      </Border>
+    </Grid>
+
+    <!-- Bottom info bar -->
+    <Border Grid.Row="3"
+            IsVisible="{Binding Preview, Converter={x:Static ObjectConverters.IsNotNull}}"
+            Background="{StaticResource BgCard}"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,1,0,0"
+            Padding="24,8">
+      <TextBlock FontSize="11" Foreground="{StaticResource TextMuted}" Text="{Binding Info}"/>
+    </Border>
+  </Grid>
+</UserControl>

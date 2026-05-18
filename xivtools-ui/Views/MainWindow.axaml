@@ -1,0 +1,321 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:vm="using:XivToolsUI.ViewModels"
+        xmlns:views="using:XivToolsUI.Views"
+        xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+        x:Class="XivToolsUI.Views.MainWindow"
+        x:DataType="vm:MainViewModel"
+        Title="XIVTools" Width="1280" Height="800"
+        MinWidth="960" MinHeight="600"
+        Background="{StaticResource BgBase}"
+        DragDrop.AllowDrop="True">
+
+  <Window.Resources>
+    <vm:BoolToBrushConverter        x:Key="BoolToBrush"/>
+    <vm:BoolToStatusConverter       x:Key="BoolToStatus"/>
+    <vm:BoolToStatusColorConverter  x:Key="BoolToStatusColor"/>
+    <vm:ActivePageConverter         x:Key="ActiveBg"/>
+    <vm:ActivePageBorderConverter   x:Key="ActiveBorder"/>
+  </Window.Resources>
+
+  <Panel>
+
+  <Grid ColumnDefinitions="220,*" RowDefinitions="*,30">
+
+    <!-- ── Sidebar ─────────────────────────────────────────── -->
+    <Border Grid.Column="0" Grid.RowSpan="2"
+            Background="{StaticResource BgSidebar}"
+            BorderBrush="{StaticResource BorderDefault}"
+            BorderThickness="0,0,1,0">
+      <Grid RowDefinitions="Auto,*,Auto">
+
+        <!-- Logo -->
+        <Border Grid.Row="0" Padding="20,20,20,16"
+                BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+          <StackPanel Spacing="2">
+            <TextBlock Text="XIVTools" FontSize="17" FontWeight="Bold"
+                       Foreground="{StaticResource TextPrimary}" LetterSpacing="0.5"/>
+            <TextBlock Text="FFXIV Modding Suite" FontSize="10"
+                       Foreground="{StaticResource TextMuted}"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Nav items -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Hidden">
+          <StackPanel Margin="0,8,0,0" Spacing="0">
+            <TextBlock Text="NAVIGATION" FontSize="10" FontWeight="Bold" LetterSpacing="1.5"
+                       Foreground="{StaticResource TextMuted}" Margin="20,8,20,6"/>
+            <StackPanel Spacing="2" Margin="8,0">
+
+              <Button Classes="nav" Command="{Binding NavigateToModListCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=modlist}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=modlist}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="PackageVariantClosed" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Mod List" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToModpackCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=modpack}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=modpack}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="ArrowUpCircle" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Modpack Ops" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToTextureCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=texture}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=texture}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="Image" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Texture Viewer" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToTextureImportCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=texImport}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=texImport}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="ImagePlus" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Texture Import" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToMaterialEditorCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=materials}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=materials}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="Palette" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Material Editor" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToModelViewerCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=model}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=model}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="Cube" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Model Viewer" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToModelImportCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=modelimport}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2"
+                          Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=modelimport}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="CubeOutline"
+                                         Width="18" Height="18" VerticalAlignment="Center"
+                                         Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Model Import" VerticalAlignment="Center"
+                             Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToItemBrowserCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=items}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=items}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="DatabaseSearch" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Item Browser" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToFileSearchCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=filesearch}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=filesearch}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="FileSearch" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="File Search" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+              <Button Classes="nav" Command="{Binding NavigateToConflictsCommand}"
+                      Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=conflicts}">
+                <Grid ColumnDefinitions="4,32,*">
+                  <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=conflicts}"/>
+                  <material:MaterialIcon Grid.Column="1" Kind="AlertCircleOutline" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                  <TextBlock Grid.Column="2" Text="Overrides" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+                </Grid>
+              </Button>
+
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+
+        <!-- Bottom section -->
+        <Border Grid.Row="2" BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,1,0,0">
+          <StackPanel Margin="8,8,8,12" Spacing="2">
+
+            <Button Classes="nav" Command="{Binding NavigateToSettingsCommand}"
+                    Background="{Binding ActivePage, Converter={StaticResource ActiveBg}, ConverterParameter=settings}">
+              <Grid ColumnDefinitions="4,32,*">
+                <Border Grid.Column="0" Width="3" Height="32" CornerRadius="2" Background="{Binding ActivePage, Converter={StaticResource ActiveBorder}, ConverterParameter=settings}"/>
+                <material:MaterialIcon Grid.Column="1" Kind="Cog" Width="18" Height="18" VerticalAlignment="Center" Foreground="{StaticResource TextSecondary}"/>
+                <TextBlock Grid.Column="2" Text="Settings" VerticalAlignment="Center" Foreground="{StaticResource TextPrimary}"/>
+              </Grid>
+            </Button>
+
+            <!-- Status pill -->
+            <Border Margin="4,4,4,0" Padding="12,8" CornerRadius="6"
+                    Background="{StaticResource BgCard}"
+                    BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1">
+              <StackPanel Spacing="4">
+                <StackPanel Spacing="1">
+                  <TextBlock Text="GAME CACHE" FontSize="10" FontWeight="Bold" LetterSpacing="0.8"
+                             Foreground="{StaticResource TextMuted}"/>
+                  <TextBlock FontSize="12" FontWeight="SemiBold"
+                             Text="{Binding IsInitialized, Converter={StaticResource BoolToStatus}}"
+                             Foreground="{Binding IsInitialized, Converter={StaticResource BoolToStatusColor}}"/>
+                </StackPanel>
+                <Border Height="1" Background="{StaticResource BorderDefault}"/>
+                <StackPanel Spacing="2">
+                  <TextBlock Text="COLLECTION" FontSize="10" FontWeight="Bold" LetterSpacing="0.8"
+                             Foreground="{StaticResource TextMuted}"/>
+                  <Button Background="Transparent" BorderThickness="0" Padding="0"
+                          Cursor="Hand" HorizontalAlignment="Left"
+                          Command="{Binding OpenCollectionPickerCommand}"
+                          ToolTip.Tip="Click to switch collection">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                      <TextBlock FontSize="11" FontWeight="SemiBold" TextWrapping="Wrap"
+                                 Text="{Binding ActiveCollection}"
+                                 Foreground="{StaticResource AccentBlue}"/>
+                      <material:MaterialIcon Kind="ChevronDown" Width="12" Height="12"
+                                             Foreground="{StaticResource AccentBlue}"
+                                             VerticalAlignment="Center"/>
+                    </StackPanel>
+                  </Button>
+                </StackPanel>
+              </StackPanel>
+            </Border>
+
+          </StackPanel>
+        </Border>
+
+      </Grid>
+    </Border>
+
+    <!-- ── Content area ──────────────────────────────────────── -->
+    <ContentControl Grid.Column="1" Grid.Row="0"
+                    Background="{StaticResource BgBase}"
+                    Content="{Binding CurrentPage}">
+      <ContentControl.DataTemplates>
+        <DataTemplate DataType="vm:ModListViewModel">
+          <views:ModListView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:ModpackViewModel">
+          <views:ModpackView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:TextureViewModel">
+          <views:TextureView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:TextureImportViewModel">
+          <views:TextureImportView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:MaterialEditorViewModel">
+          <views:MaterialEditorView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:ModelImportViewModel">
+          <views:ModelImportView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:ModelViewerViewModel">
+          <views:ModelViewerView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:ItemBrowserViewModel">
+          <views:ItemBrowserView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:FileSearchViewModel">
+          <views:FileSearchView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:ConflictViewModel">
+          <views:ConflictView/>
+        </DataTemplate>
+        <DataTemplate DataType="vm:SettingsViewModel">
+          <views:SettingsView/>
+        </DataTemplate>
+      </ContentControl.DataTemplates>
+    </ContentControl>
+
+    <!-- ── Status bar ───────────────────────────────────────── -->
+    <Border Grid.Column="1" Grid.Row="1"
+            Background="#08080F"
+            BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,1,0,0"
+            Padding="16,0">
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock VerticalAlignment="Center" FontSize="11"
+                   Foreground="{StaticResource TextMuted}" Text="{Binding StatusText}"/>
+        <TextBlock Grid.Column="1" VerticalAlignment="Center" FontSize="11"
+                   Foreground="{StaticResource TextMuted}" Text="XIVTools"/>
+      </Grid>
+    </Border>
+  </Grid>
+
+  <!-- ── Toast notifications ────────────────────────────────── -->
+  <views:ToastOverlay ZIndex="200"/>
+
+  <!-- ── Collection picker overlay ──────────────────────────── -->
+  <Panel IsVisible="{Binding ShowCollectionPicker}" Background="#AA000000">
+    <Border Background="{StaticResource BgCard}"
+            BorderBrush="{StaticResource AccentBlue}" BorderThickness="1"
+            CornerRadius="10" Padding="4" MaxWidth="220"
+            VerticalAlignment="Bottom" HorizontalAlignment="Left"
+            Margin="8,0,0,44">
+      <StackPanel>
+        <Border Padding="12,8" BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,0,0,1">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="BookMultiple" Width="14" Height="14"
+                                   Foreground="{StaticResource AccentBlue}"/>
+            <TextBlock Text="Switch Collection" FontSize="12" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+        </Border>
+        <ItemsControl ItemsSource="{Binding AvailableCollections}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate DataType="vm:CollectionEntry">
+              <Button HorizontalAlignment="Stretch" HorizontalContentAlignment="Left"
+                      Background="Transparent" BorderThickness="0"
+                      Padding="12,8" Cursor="Hand"
+                      Command="{Binding $parent[Window].DataContext.SwitchCollectionCommand}"
+                      CommandParameter="{Binding Id}">
+                <Button.Styles>
+                  <Style Selector="Button:pointerover /template/ ContentPresenter">
+                    <Setter Property="Background" Value="{StaticResource BgHover}"/>
+                  </Style>
+                </Button.Styles>
+                <TextBlock FontSize="12" Foreground="{StaticResource TextPrimary}"
+                           Text="{Binding Name}" TextWrapping="Wrap"/>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <Button Content="Cancel" HorizontalAlignment="Stretch"
+                Background="Transparent" BorderThickness="0"
+                Padding="12,6" Cursor="Hand" FontSize="11"
+                Foreground="{StaticResource TextMuted}"
+                Command="{Binding CloseCollectionPickerCommand}"/>
+      </StackPanel>
+    </Border>
+  </Panel>
+
+  </Panel>
+
+  <Window.Styles>
+    <Style Selector="Button.nav">
+      <Setter Property="HorizontalAlignment"        Value="Stretch"/>
+      <Setter Property="HorizontalContentAlignment" Value="Left"/>
+      <Setter Property="Padding"                    Value="0"/>
+      <Setter Property="Height"                     Value="40"/>
+      <Setter Property="CornerRadius"               Value="6"/>
+      <Setter Property="BorderThickness"            Value="0"/>
+      <Setter Property="Cursor"                     Value="Hand"/>
+    </Style>
+    <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1A1A2E"/>
+    </Style>
+    <Style Selector="Button.nav:pressed /template/ ContentPresenter">
+      <Setter Property="Background" Value="#1E1A30"/>
+    </Style>
+  </Window.Styles>
+</Window>

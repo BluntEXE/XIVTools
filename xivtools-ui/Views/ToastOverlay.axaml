@@ -1,0 +1,41 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:vm="using:XivToolsUI.ViewModels"
+             xmlns:material="clr-namespace:Material.Icons.Avalonia;assembly=Material.Icons.Avalonia"
+             x:Class="XivToolsUI.Views.ToastOverlay"
+             x:DataType="vm:ToastOverlayContext"
+             IsHitTestVisible="False">
+  <ItemsControl ItemsSource="{Binding Toasts}"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Bottom"
+                Margin="0,0,16,48"
+                Width="360">
+    <ItemsControl.ItemTemplate>
+      <DataTemplate DataType="vm:ToastEntry">
+        <Border IsVisible="{Binding IsVisible}"
+                Margin="0,0,0,8" Padding="14,10" CornerRadius="8"
+                BorderThickness="1" MaxWidth="360">
+          <Border.Background>
+            <SolidColorBrush Color="{Binding BgColor}"/>
+          </Border.Background>
+          <Border.BorderBrush>
+            <SolidColorBrush Color="{Binding Color}"/>
+          </Border.BorderBrush>
+          <Grid ColumnDefinitions="Auto,*">
+            <material:MaterialIcon Grid.Column="0" Width="18" Height="18"
+                                   Margin="0,0,10,0" VerticalAlignment="Top"
+                                   Kind="{Binding Icon}">
+              <material:MaterialIcon.Foreground>
+                <SolidColorBrush Color="{Binding Color}"/>
+              </material:MaterialIcon.Foreground>
+            </material:MaterialIcon>
+            <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="12"
+                       VerticalAlignment="Center"
+                       Foreground="#F1F5F9"
+                       Text="{Binding Message}"/>
+          </Grid>
+        </Border>
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>
