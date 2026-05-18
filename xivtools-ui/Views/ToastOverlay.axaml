@@ -31,7 +31,7 @@
             </material:MaterialIcon>
             <TextBlock Grid.Column="1" TextWrapping="Wrap" FontSize="12"
                        VerticalAlignment="Center"
-                       Foreground="#F1F5F9"
+                       Foreground="{StaticResource TextPrimary}"
                        Text="{Binding Message}"/>
           </Grid>
         </Border>

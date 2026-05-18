@@ -241,7 +241,7 @@
 
     <!-- ── Status bar ───────────────────────────────────────── -->
     <Border Grid.Column="1" Grid.Row="1"
-            Background="#08080F"
+            Background="{StaticResource BgStatusBar}"
             BorderBrush="{StaticResource BorderDefault}" BorderThickness="0,1,0,0"
             Padding="16,0">
       <Grid ColumnDefinitions="*,Auto">
@@ -313,10 +313,10 @@
       <Setter Property="Cursor"                     Value="Hand"/>
     </Style>
     <Style Selector="Button.nav:pointerover /template/ ContentPresenter">
-      <Setter Property="Background" Value="#1A1A2E"/>
+      <Setter Property="Background" Value="{StaticResource BgCard}"/>
     </Style>
     <Style Selector="Button.nav:pressed /template/ ContentPresenter">
-      <Setter Property="Background" Value="#1E1A30"/>
+      <Setter Property="Background" Value="{StaticResource BgHover}"/>
     </Style>
   </Window.Styles>
 </Window>

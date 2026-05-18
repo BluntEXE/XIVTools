@@ -85,7 +85,7 @@
           <!-- Status message -->
           <Border CornerRadius="6" Padding="12,8"
                   IsVisible="{Binding StatusMsg, Converter={x:Static StringConverters.IsNotNullOrEmpty}}"
-                  Background="#0D2B1A" BorderBrush="#10B981" BorderThickness="1">
+                  Background="{StaticResource BgSuccess}" BorderBrush="{StaticResource AccentGreen}" BorderThickness="1">
             <StackPanel Orientation="Horizontal" Spacing="8">
               <material:MaterialIcon Kind="CheckCircle" Width="14" Height="14"
                                      Foreground="{StaticResource AccentGreen}"/>

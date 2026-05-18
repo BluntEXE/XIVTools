@@ -70,7 +70,7 @@
               <StackPanel Spacing="2">
                 <TextBlock Text="Upgrade to Dawntrail" FontWeight="SemiBold" FontSize="13"/>
                 <TextBlock Text="Fix shaders, models, materials" FontSize="10"
-                           Foreground="#A78BFA"/>
+                           Foreground="{StaticResource TextAccent}"/>
               </StackPanel>
             </StackPanel>
           </Button>

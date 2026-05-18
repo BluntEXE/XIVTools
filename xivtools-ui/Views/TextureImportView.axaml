@@ -97,7 +97,7 @@
             </Button>
 
             <!-- Advanced: write to game -->
-            <Expander Header="Advanced: Write directly to game data (destructive)"
+            <Expander Header="Advanced: Write to game data (destructive)"
                       Foreground="{StaticResource AccentAmber}">
               <StackPanel Spacing="8" Margin="0,8,0,0">
                 <Border Background="#1A1000" BorderBrush="{StaticResource AccentAmber}"

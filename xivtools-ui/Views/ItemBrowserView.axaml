@@ -119,7 +119,7 @@
       </Grid>
 
       <!-- Busy overlay -->
-      <Border IsVisible="{Binding IsBusy}" Background="#CC000000">
+      <Border IsVisible="{Binding IsBusy}" Background="{StaticResource BgOverlay}">
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="12">
           <ProgressBar IsIndeterminate="True" Width="200"/>
           <TextBlock Text="Working..." Foreground="{StaticResource TextSecondary}"

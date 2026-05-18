@@ -105,8 +105,11 @@
     <SolidColorBrush x:Key="BgSurface"    Color="#13131F"/>
     <SolidColorBrush x:Key="BgCard"       Color="#1A1A2E"/>
     <SolidColorBrush x:Key="BgSidebar"    Color="#0A0A14"/>
+    <SolidColorBrush x:Key="BgStatusBar"  Color="#08080F"/>
     <SolidColorBrush x:Key="BgHover"      Color="#1E1E30"/>
     <SolidColorBrush x:Key="BgInput"      Color="#16162A"/>
+    <SolidColorBrush x:Key="BgOverlay"    Color="#CC000000"/>
+    <SolidColorBrush x:Key="BgSuccess"    Color="#0D2B1A"/>
 
     <SolidColorBrush x:Key="AccentPrimary"  Color="#7C3AED"/>
     <SolidColorBrush x:Key="AccentBlue"     Color="#0EA5E9"/>
