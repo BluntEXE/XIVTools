@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia.Platform.Storage;
@@ -14,6 +16,15 @@ using xivModdingFramework.SqPack.FileTypes;
 using PMPClass = xivModdingFramework.Mods.FileTypes.PMP.PMP;
 
 namespace XivToolsUI.ViewModels;
+
+public partial class UpgradeQueueItem : ObservableObject
+{
+    public string Path { get; }
+    public string Name => System.IO.Path.GetFileName(Path);
+    [ObservableProperty] private string _status = "Pending";
+
+    public UpgradeQueueItem(string path) => Path = path;
+}
 
 public partial class ModpackViewModel : ObservableObject
 {
@@ -170,6 +181,10 @@ public partial class ModpackViewModel : ObservableObject
     [ObservableProperty] private string _operationLog = "Select a modpack file to get started.";
     [ObservableProperty] private bool   _isBusy;
 
+    // ── Dawntrail upgrade (batch) ────────────────────────────────────────────
+    public ObservableCollection<UpgradeQueueItem> UpgradeQueue { get; } = new();
+    [ObservableProperty] private bool _isUpgrading;
+
     public ModpackViewModel(MainViewModel main) => _main = main;
 
     private void Log(string msg)
@@ -177,6 +192,34 @@ public partial class ModpackViewModel : ObservableObject
         OperationLog += "\n" + msg;
         _main.SetStatus(msg);
     }
+
+    [RelayCommand]
+    private async Task BrowseUpgradeFilesAsync()
+    {
+        var files = await GetTopLevel()?.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions {
+            Title = "Select Modpacks to Upgrade",
+            AllowMultiple = true,
+            FileTypeFilter = new[] {
+                new FilePickerFileType("FFXIV Modpack") { Patterns = new[] { "*.ttmp2", "*.ttmp", "*.pmp" } },
+                new FilePickerFileType("All Files")     { Patterns = new[] { "*" } }
+            }
+        }) ?? Array.Empty<IStorageFile>();
+
+        var existing = new HashSet<string>(UpgradeQueue.Count > 0
+            ? UpgradeQueue.Select(i => i.Path)
+            : Array.Empty<string>(), StringComparer.OrdinalIgnoreCase);
+
+        foreach (var f in files)
+        {
+            var path = f.Path.LocalPath;
+            if (existing.Add(path)) UpgradeQueue.Add(new UpgradeQueueItem(path));
+        }
+
+        if (files.Count > 0) OperationLog = $"{UpgradeQueue.Count} file(s) queued.";
+    }
+
+    [RelayCommand]
+    private void ClearUpgradeQueue() => UpgradeQueue.Clear();
 
     [RelayCommand]
     private async Task BrowseInputAsync()
@@ -191,7 +234,8 @@ public partial class ModpackViewModel : ObservableObject
         }) ?? Array.Empty<IStorageFile>();
         if (files.Count > 0) {
             InputPath  = files[0].Path.LocalPath;
-            OutputPath = Path.ChangeExtension(InputPath, null) + "_DT.pmp";
+            OutputPath = Path.ChangeExtension(InputPath, null) + "_converted" +
+                (Path.GetExtension(InputPath).Equals(".pmp", StringComparison.OrdinalIgnoreCase) ? ".ttmp2" : ".pmp");
             OperationLog = $"Selected: {Path.GetFileName(InputPath)}";
         }
     }
@@ -200,43 +244,57 @@ public partial class ModpackViewModel : ObservableObject
     private async Task BrowseOutputAsync()
     {
         var file = await GetTopLevel()?.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions {
-            Title = "Save Upgraded Modpack",
+            Title = "Save Converted Modpack",
             DefaultExtension = "pmp",
             FileTypeChoices = new[] {
-                new FilePickerFileType("Penumbra Modpack (*.pmp)") { Patterns = new[] { "*.pmp" } }
+                new FilePickerFileType("Penumbra Modpack (*.pmp)") { Patterns = new[] { "*.pmp" } },
+                new FilePickerFileType("TexTools Modpack (*.ttmp2)") { Patterns = new[] { "*.ttmp2" } }
             }
         });
         if (file != null) OutputPath = file.Path.LocalPath;
     }
 
     [RelayCommand]
-    private async Task UpgradeAsync()
+    private async Task UpgradeAllAsync()
     {
-        if (string.IsNullOrWhiteSpace(InputPath))  { Log("Select an input modpack first."); return; }
-        if (string.IsNullOrWhiteSpace(OutputPath)) { Log("Select an output path first."); return; }
+        if (UpgradeQueue.Count == 0) { Log("Select modpack files to upgrade first."); return; }
 
-        IsBusy = true;
-        OperationLog = $"Upgrading {Path.GetFileName(InputPath)} for Dawntrail...";
-        try {
-            var changed = await Task.Run(() => ModpackUpgrader.UpgradeModpack(InputPath, OutputPath, true, true));
-            var msg = changed ? $"Upgraded → {Path.GetFileName(OutputPath)}" : $"Already DT-compatible → {Path.GetFileName(OutputPath)}";
-            Log(msg);
-            ToastService.Instance.Success(msg);
-        } catch (Exception ex) {
-            // Patch 7.5 broke CMP (CharaMakeParameter) format - TexTools crashes on this entirely.
-            // We detect it and give a clear message rather than a silent failure.
-            if (ex.Message.Contains("CMP") || ex.Message.Contains("CharaMake") ||
-                ex.Message.Contains("scaling") || ex.InnerException?.Message.Contains("CMP") == true) {
-                Log($"Warning: CMP/racial-scaling data could not be processed (patch 7.5 format change).");
-                Log($"The mod was partially upgraded - gear/texture/model changes are applied.");
-                Log($"Output saved to: {Path.GetFileName(OutputPath)}");
-                ToastService.Instance.Warning("Partially upgraded - CMP racial scaling skipped (patch 7.5)");
-            } else {
-                Log($"Error: {ex.Message}");
-                ToastService.Instance.Error($"Upgrade failed: {ex.Message}");
+        IsUpgrading = true;
+        int upgraded = 0, unchanged = 0, failed = 0;
+
+        foreach (var item in UpgradeQueue)
+        {
+            item.Status = "Upgrading...";
+            var outputPath = Path.ChangeExtension(item.Path, null) + "_DT.pmp";
+            try
+            {
+                var changed = await Task.Run(() => ModpackUpgrader.UpgradeModpack(item.Path, outputPath, true, true));
+                if (changed) { item.Status = "Upgraded"; upgraded++; }
+                else         { item.Status = "Already DT-compatible"; unchanged++; }
+            }
+            catch (Exception ex)
+            {
+                // Patch 7.5 broke CMP (CharaMakeParameter) format - TexTools crashes on this entirely.
+                // We detect it and give a clear message rather than a silent failure.
+                if (ex.Message.Contains("CMP") || ex.Message.Contains("CharaMake") ||
+                    ex.Message.Contains("scaling") || ex.InnerException?.Message.Contains("CMP") == true)
+                {
+                    item.Status = "Partial - CMP/racial-scaling skipped (patch 7.5)";
+                    upgraded++;
+                }
+                else
+                {
+                    item.Status = $"Failed: {ex.Message}";
+                    failed++;
+                }
             }
         }
-        IsBusy = false;
+
+        IsUpgrading = false;
+        var msg = $"Upgraded {upgraded}, unchanged {unchanged}, failed {failed}.";
+        Log(msg);
+        if (failed > 0) ToastService.Instance.Warning(msg);
+        else            ToastService.Instance.Success(msg);
     }
 
     [RelayCommand]

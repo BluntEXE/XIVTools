@@ -21,75 +21,54 @@
     <ScrollViewer Grid.Row="1">
       <StackPanel Margin="24" Spacing="20" MaxWidth="720">
 
-        <!-- Input card -->
+        <!-- Upgrade to Dawntrail (batch) -->
         <Border Classes="card">
           <StackPanel Spacing="12">
             <StackPanel Orientation="Horizontal" Spacing="8">
-              <material:MaterialIcon Kind="FolderOpen" Width="16" Height="16"
+              <material:MaterialIcon Kind="ArrowUpCircle" Width="16" Height="16"
                                      Foreground="{StaticResource AccentBlue}"/>
-              <TextBlock Text="Source Modpack" FontWeight="SemiBold"
+              <TextBlock Text="Upgrade to Dawntrail" FontWeight="SemiBold"
                          Foreground="{StaticResource TextPrimary}" FontSize="13"/>
             </StackPanel>
-            <TextBlock Text="Supports .ttmp2, .ttmp, and .pmp formats"
-                       FontSize="11" Foreground="{StaticResource TextMuted}"/>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBox Grid.Column="0" Classes="field"
-                       Text="{Binding InputPath}"
-                       PlaceholderText="Select source modpack..."/>
+            <TextBlock Text="Select any number of .ttmp2/.ttmp/.pmp files. Upgraded copies are saved alongside the originals with a &quot;_DT&quot; suffix."
+                       FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"/>
+
+            <Grid ColumnDefinitions="*,Auto,Auto">
+              <TextBlock Grid.Column="0" VerticalAlignment="Center"
+                         Text="{Binding UpgradeQueue.Count, StringFormat='{}{0} file(s) queued'}"
+                         FontSize="12" Foreground="{StaticResource TextSecondary}"/>
               <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
-                      Command="{Binding BrowseInputCommand}" Content="Browse"/>
+                      Command="{Binding ClearUpgradeQueueCommand}" Content="Clear"/>
+              <Button Grid.Column="2" Classes="btn" Margin="8,0,0,0"
+                      Command="{Binding BrowseUpgradeFilesCommand}" Content="Add Files..."/>
             </Grid>
+
+            <ItemsControl ItemsSource="{Binding UpgradeQueue}" MaxHeight="200">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                  <Grid ColumnDefinitions="*,Auto" Margin="0,3">
+                    <TextBlock Grid.Column="0" Text="{Binding Name}"
+                               FontSize="12" Foreground="{StaticResource TextPrimary}"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="1" Text="{Binding Status}" Margin="12,0,0,0"
+                               FontSize="11" Foreground="{StaticResource TextMuted}"/>
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Button Classes="btn-primary" HorizontalAlignment="Left"
+                    Command="{Binding UpgradeAllCommand}" IsEnabled="{Binding !IsUpgrading}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <material:MaterialIcon Kind="ArrowUpCircle" Width="16" Height="16"/>
+                <TextBlock Text="Upgrade All" FontWeight="SemiBold"/>
+              </StackPanel>
+            </Button>
+
+            <ProgressBar IsIndeterminate="{Binding IsUpgrading}" IsVisible="{Binding IsUpgrading}"
+                         Height="3" CornerRadius="2"/>
           </StackPanel>
         </Border>
-
-        <!-- Output card -->
-        <Border Classes="card">
-          <StackPanel Spacing="12">
-            <StackPanel Orientation="Horizontal" Spacing="8">
-              <material:MaterialIcon Kind="ContentSave" Width="16" Height="16"
-                                     Foreground="{StaticResource AccentGreen}"/>
-              <TextBlock Text="Output Path" FontWeight="SemiBold"
-                         Foreground="{StaticResource TextPrimary}" FontSize="13"/>
-            </StackPanel>
-            <Grid ColumnDefinitions="*,Auto">
-              <TextBox Grid.Column="0" Classes="field"
-                       Text="{Binding OutputPath}"
-                       PlaceholderText="Output .pmp path..."/>
-              <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
-                      Command="{Binding BrowseOutputCommand}" Content="Browse"/>
-            </Grid>
-          </StackPanel>
-        </Border>
-
-        <!-- Actions -->
-        <Grid ColumnDefinitions="*,*" ColumnSpacing="12">
-          <Button Grid.Column="0" Classes="btn-primary"
-                  Command="{Binding UpgradeCommand}" IsEnabled="{Binding !IsBusy}">
-            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-              <material:MaterialIcon Kind="ArrowUpCircle" Width="18" Height="18"/>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Upgrade to Dawntrail" FontWeight="SemiBold" FontSize="13"/>
-                <TextBlock Text="Fix shaders, models, materials" FontSize="10"
-                           Foreground="{StaticResource TextAccent}"/>
-              </StackPanel>
-            </StackPanel>
-          </Button>
-          <Button Grid.Column="1" Classes="btn"
-                  Command="{Binding ResaveCommand}" IsEnabled="{Binding !IsBusy}">
-            <StackPanel Orientation="Horizontal" Spacing="8" HorizontalAlignment="Center">
-              <material:MaterialIcon Kind="Refresh" Width="18" Height="18"/>
-              <StackPanel Spacing="2">
-                <TextBlock Text="Convert Format" FontWeight="SemiBold" FontSize="13"/>
-                <TextBlock Text=".ttmp2 ↔ .pmp" FontSize="10"
-                           Foreground="{StaticResource TextMuted}"/>
-              </StackPanel>
-            </StackPanel>
-          </Button>
-        </Grid>
-
-        <!-- Progress -->
-        <ProgressBar IsIndeterminate="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
-                     Height="3" CornerRadius="2"/>
 
         <!-- Log -->
         <Border Classes="card" Padding="0">
@@ -107,6 +86,49 @@
                         Foreground="{StaticResource TextSecondary}"
                         FontFamily="Monospace" FontSize="12"
                         TextWrapping="Wrap"/>
+          </StackPanel>
+        </Border>
+
+        <!-- Divider -->
+        <Border Height="1" Background="{StaticResource BorderDefault}" Margin="0,8"/>
+
+        <!-- Convert Format -->
+        <StackPanel Spacing="4">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <material:MaterialIcon Kind="Refresh" Width="16" Height="16"
+                                   Foreground="{StaticResource AccentGreen}"/>
+            <TextBlock Text="Convert Format" FontSize="14" FontWeight="SemiBold"
+                       Foreground="{StaticResource TextPrimary}"/>
+          </StackPanel>
+          <TextBlock Text="Convert a single modpack between .ttmp2 and .pmp."
+                     FontSize="11" Foreground="{StaticResource TextMuted}" TextWrapping="Wrap"/>
+        </StackPanel>
+
+        <Border Classes="card">
+          <StackPanel Spacing="12">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Grid.Column="0" Classes="field"
+                       Text="{Binding InputPath}"
+                       PlaceholderText="Select source modpack..."/>
+              <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                      Command="{Binding BrowseInputCommand}" Content="Browse"/>
+            </Grid>
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBox Grid.Column="0" Classes="field"
+                       Text="{Binding OutputPath}"
+                       PlaceholderText="Output path..."/>
+              <Button Grid.Column="1" Classes="btn" Margin="8,0,0,0"
+                      Command="{Binding BrowseOutputCommand}" Content="Browse"/>
+            </Grid>
+            <Button Classes="btn" HorizontalAlignment="Left"
+                    Command="{Binding ResaveCommand}" IsEnabled="{Binding !IsBusy}">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <material:MaterialIcon Kind="Refresh" Width="16" Height="16"/>
+                <TextBlock Text="Convert" FontWeight="SemiBold"/>
+              </StackPanel>
+            </Button>
+            <ProgressBar IsIndeterminate="{Binding IsBusy}" IsVisible="{Binding IsBusy}"
+                         Height="3" CornerRadius="2"/>
           </StackPanel>
         </Border>
 
